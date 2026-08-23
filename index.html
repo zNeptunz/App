@@ -1204,6 +1204,11 @@ async function loadAdminConfig(){
     if(cfg && typeof cfg.adminHash === 'string' && /^[0-9a-f]{64}$/.test(cfg.adminHash)){
       adminCfg = { hash: cfg.adminHash, salt: String(cfg.salt || 'mastaler') };
       try{ localStorage.setItem('mst_admincfg', JSON.stringify(adminCfg)); }catch(e){}
+    } else {
+      // Server erreichbar, aber dort liegt kein Kennwort mehr:
+      // Zwischenspeicher leeren, sonst kaeme man nach dem Loeschen nie wieder rein.
+      adminCfg = null;
+      try{ localStorage.removeItem('mst_admincfg'); }catch(e){}
     }
   }catch(e){ /* offline - Zwischenspeicher gilt */ }
 }
@@ -1212,11 +1217,31 @@ async function checkAdminSecret(input){
   if(!input) return false;
   if(configReady) await configReady;      // erst wenn die Konfiguration da ist
   if(adminCfg && adminCfg.hash){
-    if(!cryptoOk){ toast('Verschlüsselung nicht verfügbar – Seite über https aufrufen'); return false; }
+    if(!cryptoOk){
+      toast('Seite über https oder localhost aufrufen – sonst geht die Prüfung nicht');
+      return false;
+    }
     try{ return (await sha256Hex(adminCfg.salt + ':' + input)) === adminCfg.hash; }
-    catch(e){ return false; }
+    catch(e){ toast('Prüfung fehlgeschlagen'); return false; }
   }
   return input === ADMIN_PIN_FALLBACK;     // nur ohne hinterlegte Konfiguration
+}
+// Zeigt an, woran ein Login gerade scheitert
+function adminDiagnose(){
+  return {
+    aufruf: location.protocol + '//' + location.host,
+    verschluesselungVerfuegbar: cryptoOk,
+    kennwortHinterlegt: !!(adminCfg && adminCfg.hash),
+    salt: adminCfg ? adminCfg.salt : null,
+    datenbank: FB_BASE.includes('-dev') ? 'DEV' : 'PROD',
+    konfigPfad: FB_BASE + '/' + CONFIG_PATH + '.json'
+  };
+}
+function adminReset(){
+  try{ localStorage.removeItem('mst_admincfg'); }catch(e){}
+  adminCfg = null;
+  alert('Zwischenspeicher geleert.\n\nWenn in Firebase unter mastaler/config ebenfalls\nnichts mehr steht, gilt wieder die Notfall-PIN.\n\nSeite wird neu geladen.');
+  location.reload();
 }
 function adminSecretIsDefault(){ return !(adminCfg && adminCfg.hash); }
 
