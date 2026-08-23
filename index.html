@@ -1,0 +1,3170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2c2c2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mastaler">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Mastaler App</title>
+<style>
+:root{
+  --bg:#f5f4f0;--surface:#fff;--surface2:#edece7;
+  --border:rgba(0,0,0,.09);--border-md:rgba(0,0,0,.16);
+  --text:#1c1c1a;--text-muted:#6a6a63;--text-hint:#b0afa6;
+  --green:#3a6b4a;--green-light:#e6f0e9;--green-text:#274f34;
+  --orange:#c45e1a;--orange-light:#fdf0e6;--orange-text:#8a3f0e;
+  --red:#b83232;--red-light:#fceaea;
+  --cat-termin:#3b6ea5;--cat-termin-bg:#e7eff7;
+  --cat-geburtstag:#8e4a9e;--cat-geburtstag-bg:#f3e9f5;
+  --cat-schule:#c47a1a;--cat-schule-bg:#fbf1e2;
+  --cat-arbeit:#5a5a52;--cat-arbeit-bg:#ececeb;
+  --cat-urlaub:#2f7d5c;--cat-urlaub-bg:#e4f1eb;
+  --cat-sonstiges:#7a6a55;--cat-sonstiges-bg:#f1ede7;
+  --r:14px;--r-sm:9px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--surface:#1d1d1b;--surface2:#252523;
+  --border:rgba(255,255,255,.09);--border-md:rgba(255,255,255,.18);
+  --text:#f0efe9;--text-muted:#9a9a91;--text-hint:#4e4e48;
+  --green:#56976a;--green-light:#182b1f;--green-text:#8ec4a0;
+  --orange:#e07a3a;--orange-light:#2b1a0c;--orange-text:#f0a870;
+  --red:#e05555;--red-light:#2b1010;
+  --cat-termin:#6d9fd4;--cat-termin-bg:#16212e;
+  --cat-geburtstag:#bd85cc;--cat-geburtstag-bg:#241a28;
+  --cat-schule:#e0a250;--cat-schule-bg:#2a1f0f;
+  --cat-arbeit:#9a9a90;--cat-arbeit-bg:#222221;
+  --cat-urlaub:#5fae88;--cat-urlaub-bg:#13241c;
+  --cat-sonstiges:#a89a7d;--cat-sonstiges-bg:#232019;
+}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);max-width:520px;margin:0 auto;min-height:100vh}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;max-width:520px;margin:0 auto}
+.splash-icon{width:76px;height:76px;background:var(--green);border-radius:22px;display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+#splash h1{font-size:27px;font-weight:700;letter-spacing:-.6px;margin-bottom:8px;text-align:center}
+#splash p{font-size:15px;color:var(--text-muted);text-align:center;margin-bottom:30px;line-height:1.5}
+#splash input{width:100%;padding:14px 16px;font-size:17px;border:0.5px solid var(--border-md);border-radius:var(--r-sm);background:var(--surface);color:var(--text);outline:none;margin-bottom:12px;transition:border-color .15s}
+#splash input:focus{border-color:var(--green)}
+.btn-primary{width:100%;padding:14px;background:var(--green);color:white;font-size:16px;font-weight:600;border:none;border-radius:var(--r-sm);cursor:pointer;transition:opacity .15s}
+.btn-primary:active{opacity:.8}
+.admin-hint{margin-top:18px;font-size:13px;color:var(--text-muted);text-align:center}
+.admin-link{color:var(--green);cursor:pointer;text-decoration:underline;background:none;border:none;font:inherit}
+
+/* PIN BOX */
+.pin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1001;align-items:center;justify-content:center;padding:24px}
+.pin-overlay.open{display:flex}
+.pin-box{background:var(--surface);border-radius:var(--r);padding:26px 22px;width:100%;max-width:340px}
+.pin-box h2{font-size:18px;font-weight:600;margin-bottom:6px}
+.pin-box p{font-size:14px;color:var(--text-muted);margin-bottom:16px}
+.pin-box input{width:100%;padding:12px 14px;font-size:17px;letter-spacing:2px;text-align:center;border:0.5px solid var(--border-md);border-radius:var(--r-sm);background:var(--bg);color:var(--text);outline:none;margin-bottom:12px}
+.pin-row{display:flex;gap:8px}
+.btn-sec{flex:1;padding:12px;border:0.5px solid var(--border-md);border-radius:var(--r-sm);background:none;color:var(--text);font-size:15px;cursor:pointer;transition:background .12s}
+.btn-sec:active{background:var(--surface2)}
+.pin-err{font-size:13px;color:var(--red);margin-bottom:8px;display:none}
+
+/* HEADER */
+.header{padding:calc(var(--st) + 14px) 16px 12px;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:50}
+.header.admin-mode{border-bottom:2px solid var(--orange)}
+.header-row{display:flex;align-items:center;gap:10px}
+.header-avatar{width:34px;height:34px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--green-text);flex-shrink:0;cursor:pointer}
+.header.admin-mode .header-avatar{background:var(--orange-light);color:var(--orange-text)}
+.header-text{flex:1;min-width:0}
+.header-text h1{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-text p{font-size:12px;color:var(--text-muted)}
+.badge-admin{font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange-text);padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.btn-icon{width:36px;height:36px;border:0.5px solid var(--border-md);border-radius:10px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s}
+.btn-icon:active{background:var(--surface2)}
+.btn-icon svg{width:18px;height:18px;stroke:var(--text-muted);stroke-width:2;fill:none}
+.admin-bar{display:none;background:var(--orange-light);border-bottom:0.5px solid var(--orange);padding:6px 16px;font-size:12px;color:var(--orange-text);font-weight:500;align-items:center;gap:8px;position:sticky;top:calc(var(--st) + 63px);z-index:45}
+.admin-bar.show{display:flex}
+.admin-bar svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;flex-shrink:0}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:calc(var(--st) + 63px);z-index:40}
+.tabs.with-admin-bar{top:calc(var(--st) + 63px + 29px)}
+.tab{flex:1;padding:11px 2px;font-size:10.5px;font-weight:400;color:var(--text-muted);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .16s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative}
+.tab.active{color:var(--green);font-weight:600;border-bottom-color:var(--green)}
+.tab svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.9;fill:none;flex-shrink:0}
+.tab-dot{position:absolute;top:7px;right:calc(50% - 20px);width:6px;height:6px;background:var(--orange);border-radius:50%;display:none}
+.tab-dot.show{display:block}
+
+/* SECTION */
+.section{display:none;padding:14px 14px 100px}
+.section.active{display:block}
+/* ===== KALENDER ===== */
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cal-month{flex:1;font-size:17px;font-weight:600;text-align:center}
+.cal-nav{width:34px;height:34px;border:0.5px solid var(--border-md);border-radius:9px;background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cal-nav:active{background:var(--surface2)}
+.cal-nav svg{width:16px;height:16px;stroke:var(--text-muted);stroke-width:2.2;fill:none}
+.cal-grid{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:8px;margin-bottom:14px}
+.cal-wd{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.cal-wd span{text-align:center;font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;padding:4px 0}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:5px;cursor:pointer;position:relative;border:1px solid transparent;transition:background .12s}
+.cal-day:active{background:var(--surface2)}
+.cal-day.other{opacity:.28}
+.cal-day.today{border-color:var(--green);background:var(--green-light)}
+.cal-day.today .cal-num{color:var(--green-text);font-weight:700}
+.cal-day.sel{background:var(--green);border-color:var(--green)}
+.cal-day.sel .cal-num{color:#fff;font-weight:700}
+.cal-num{font-size:13px;color:var(--text);line-height:1}
+.cal-dots{display:flex;gap:2px;margin-top:4px;flex-wrap:wrap;justify-content:center;max-width:90%}
+.cal-dot{width:5px;height:5px;border-radius:50%}
+.cal-meal{position:absolute;bottom:3px;width:12px;height:2px;border-radius:1px;background:var(--green);opacity:.65}
+.cal-day.sel .cal-meal{background:#fff}
+
+/* Tagesdetail */
+.day-panel{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.day-panel-head{padding:12px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px}
+.day-panel-date{flex:1;font-size:15px;font-weight:600}
+.btn-mini{padding:7px 12px;border:0.5px solid var(--green);border-radius:20px;background:none;color:var(--green);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .12s}
+.btn-mini:active{background:var(--green-light)}
+.day-panel-body{padding:6px 14px 12px}
+.ev-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)}
+.ev-row:last-child{border-bottom:none}
+.ev-stripe{width:3px;align-self:stretch;border-radius:2px;flex-shrink:0;min-height:32px}
+.ev-main{flex:1;min-width:0}
+.ev-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.3}
+.ev-meta{font-size:12px;color:var(--text-muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ev-cat{font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px}
+.ev-notes{font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.ev-actions{display:flex;gap:4px;flex-shrink:0}
+.ev-btn{width:30px;height:30px;border:0.5px solid var(--border-md);border-radius:8px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.ev-btn:active{background:var(--surface2)}
+.ev-btn svg{width:13px;height:13px;stroke:var(--text-muted);stroke-width:2;fill:none}
+.day-meal-line{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.day-meal-line:last-child{border-bottom:none}
+.meal-badge{font-size:10px;font-weight:700;background:var(--green-light);color:var(--green-text);padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
+.no-ev{font-size:13px;color:var(--text-hint);font-style:italic;padding:10px 0}
+
+/* Kommende Termine */
+.upcoming-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin:4px 0 8px}
+.up-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:11px;cursor:pointer}
+.up-card:active{background:var(--surface2)}
+.up-date{width:42px;flex-shrink:0;text-align:center}
+.up-date-d{font-size:17px;font-weight:700;line-height:1}
+.up-date-m{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.up-main{flex:1;min-width:0}
+.up-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.up-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.up-stripe{width:3px;height:32px;border-radius:2px;flex-shrink:0}
+
+/* Segmented control */
+.seg{display:flex;gap:6px;margin-bottom:12px;background:var(--surface2);padding:3px;border-radius:11px}
+.seg button{flex:1;padding:8px 6px;border:none;background:none;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;border-radius:9px;transition:all .15s}
+.seg button.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* ===== FORMULARE ===== */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.card-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;display:block}
+.row{display:flex;gap:8px;align-items:center}
+.inp{flex:1;width:100%;padding:11px 13px;font-size:15px;border:0.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;font-family:inherit}
+.inp:focus{border-color:var(--green)}
+textarea.inp{resize:vertical;min-height:64px;font-size:14px}
+.btn-add{width:44px;height:44px;background:var(--green);border:none;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
+.btn-add:active{opacity:.75}
+.btn-add svg{width:22px;height:22px;stroke:white;stroke-width:2.5;fill:none}
+.file-btn{flex:1;padding:10px 13px;border:0.5px dashed var(--border-md);border-radius:var(--r-sm);background:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .12s}
+.file-btn:active{background:var(--surface2)}
+.file-btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;flex-shrink:0}
+.f-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px;margin-top:14px}
+.f-label:first-of-type{margin-top:0}
+.cat-pick{display:flex;flex-wrap:wrap;gap:6px}
+.cat-opt{padding:7px 12px;border:0.5px solid var(--border-md);border-radius:20px;background:none;font-size:13px;color:var(--text-muted);cursor:pointer;transition:all .12s}
+.cat-opt.sel{font-weight:600;border-width:1.5px}
+.time-row{display:flex;gap:8px;align-items:center}
+.chk-row{display:flex;align-items:center;gap:9px;padding:10px 0;cursor:pointer}
+.chk-row input{width:19px;height:19px;accent-color:var(--green);cursor:pointer}
+.chk-row span{font-size:14px;color:var(--text)}
+
+/* ===== GERICHTE ===== */
+.dish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:4px}
+.dish-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative}
+.dish-thumb{width:100%;height:85px;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dish-thumb img{width:100%;height:85px;object-fit:cover;display:block}
+.dish-name{padding:8px 10px;font-size:13px;font-weight:500;color:var(--text);line-height:1.3;word-break:break-word}
+.del-btn{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.dish-card:hover .del-btn,.dish-card:focus-within .del-btn{opacity:1}
+@media(hover:none){.del-btn{opacity:1}}
+.del-btn svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none}
+.edit-btn-card{position:absolute;top:5px;right:35px;background:rgba(0,0,0,.35);border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:1}
+.edit-btn-card svg{width:12px;height:12px;stroke:#fff;stroke-width:2;fill:none}
+
+/* ===== WOCHENPLAN ===== */
+.week-actions{display:flex;gap:8px;margin-bottom:14px}
+.btn-wk{flex:1;min-width:0;padding:10px 8px;border:0.5px solid var(--border-md);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .12s;white-space:nowrap}
+.btn-wk:active{background:var(--surface2)}
+.btn-wk.green{background:var(--green);color:white;border-color:transparent}
+.btn-wk.green:active{opacity:.82}
+.btn-wk svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;flex-shrink:0}
+.day-row{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.day-header{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.day-chip{font-size:12px;font-weight:700;color:var(--green-text);background:var(--green-light);padding:4px 9px;border-radius:20px;flex-shrink:0}
+.day-chip.is-today{background:var(--green);color:#fff}
+.day-meal-name{flex:1;font-size:14px;font-weight:500;color:var(--text);min-width:0;word-break:break-word}
+.day-meal-none{flex:1;font-size:13px;color:var(--text-hint);font-style:italic}
+.day-thumb-sm{width:38px;height:38px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.day-thumb-sm img{width:38px;height:38px;object-fit:cover}
+.btn-edit-day{width:32px;height:32px;border:0.5px solid var(--border-md);border-radius:8px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s}
+.btn-edit-day:active{background:var(--surface2)}
+.btn-edit-day svg{width:14px;height:14px;stroke:var(--text-muted);stroke-width:2;fill:none}
+.options-area{padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:6px}
+.option-chip{display:flex;align-items:center;gap:5px;padding:4px 7px 4px 5px;border:0.5px solid var(--border-md);border-radius:20px;background:var(--surface2);font-size:12px;color:var(--text)}
+.option-chip.final{border-color:var(--green);background:var(--green-light);color:var(--green-text)}
+.option-chip-thumb{width:20px;height:20px;border-radius:50%;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.option-chip-thumb img{width:20px;height:20px;object-fit:cover}
+.option-vote-count{font-size:10px;font-weight:700;background:var(--green-light);color:var(--green-text);padding:1px 5px;border-radius:10px}
+.option-set-final{border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:15px;padding:6px 8px;margin:-6px 0;opacity:.6;line-height:1;min-width:30px}
+.option-set-final:active{opacity:1;color:var(--green)}
+.option-remove{border:none;background:none;color:var(--text-hint);cursor:pointer;font-size:18px;padding:6px 8px;margin:-6px 0;line-height:1;min-width:30px}
+.option-remove:active{color:var(--red)}
+.max-hint{font-size:11px;color:var(--orange-text);background:var(--orange-light);padding:2px 8px;border-radius:20px}
+.votes-area{border-top:0.5px solid var(--border);padding:10px 14px 12px}
+.votes-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.vote-option{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:0.5px solid var(--border);flex-wrap:wrap}
+.vote-option:last-child{border-bottom:none}
+.vote-thumb{width:28px;height:28px;border-radius:6px;overflow:hidden;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vote-thumb img{width:28px;height:28px;object-fit:cover}
+.vote-dish-name{flex:1;font-size:13px;color:var(--text);min-width:60px;word-break:break-word}
+.vote-bar-wrap{width:52px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.vote-bar{height:5px;background:var(--green);border-radius:3px;transition:width .3s}
+.vote-count{font-size:12px;color:var(--text-muted);min-width:16px;text-align:right}
+.vote-cast-btn{padding:6px 12px;border:0.5px solid var(--green);border-radius:20px;background:none;color:var(--green);font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.vote-cast-btn.voted{background:var(--green);color:white}
+.vote-cast-btn:active{opacity:.75}
+.voters-row{display:flex;flex-wrap:wrap;gap:4px;width:100%}
+.voter-chip{font-size:10px;background:var(--green-light);color:var(--green-text);padding:2px 6px;border-radius:20px;font-weight:500}
+.no-options-hint{font-size:13px;color:var(--text-hint);font-style:italic}
+.final-set-banner{background:var(--green-light);padding:8px 14px;font-size:13px;color:var(--green-text);font-weight:500}
+
+/* ===== AKTIVITAET ===== */
+.bell-wrap{position:relative;flex-shrink:0}
+.bell-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--orange);border-radius:50%;border:1.5px solid var(--surface);display:none}
+.bell-dot.show{display:block}
+.act-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.act-row:last-child{border-bottom:none}
+.act-row.fresh .act-text{font-weight:600}
+.act-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700}
+.act-main{flex:1;min-width:0}
+.act-text{font-size:14px;color:var(--text);line-height:1.35;word-break:break-word}
+.act-meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+.act-new-line{display:flex;align-items:center;gap:8px;margin:4px 0 10px}
+.act-new-line span{font-size:10px;font-weight:700;color:var(--orange-text);background:var(--orange-light);padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.act-new-line div{flex:1;height:0.5px;background:var(--border)}
+
+/* ===== OFFLINE ===== */
+#offline-bar{display:none;position:fixed;bottom:calc(var(--sb) + 8px);left:12px;background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;z-index:9998;letter-spacing:.3px}
+#offline-bar.show{display:block}
+
+/* ===== EINKAUF ===== */
+.shop-row{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px}
+.shop-row.done{opacity:.55}
+.shop-name{flex:1;font-size:14px;color:var(--text);word-break:break-word}
+.shop-row.done .shop-name{text-decoration:line-through;color:var(--text-muted)}
+.shop-src{font-size:10px;font-weight:600;background:var(--surface2);color:var(--text-muted);padding:2px 7px;border-radius:20px;flex-shrink:0;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shop-sum{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--text-muted);margin-bottom:10px}
+
+/* ===== VERLAUF ===== */
+.hist-week{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:9px;overflow:hidden}
+.hist-head{padding:10px 13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px}
+.hist-kw{font-size:13px;font-weight:600}
+.hist-range{font-size:11px;color:var(--text-muted);margin-left:auto}
+.hist-body{padding:6px 13px 10px}
+.hist-line{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px}
+.hist-day{font-size:11px;font-weight:700;color:var(--text-muted);width:22px;flex-shrink:0}
+.hist-dish{flex:1;word-break:break-word}
+.hist-none{color:var(--text-hint);font-style:italic;font-size:12px}
+.freq-row{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px}
+.freq-name{flex:1;font-size:14px;word-break:break-word}
+.freq-meta{font-size:12px;color:var(--text-muted);text-align:right;flex-shrink:0}
+.freq-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.freq-badge.recent{background:var(--orange-light);color:var(--orange-text)}
+.freq-badge.never{background:var(--green-light);color:var(--green-text)}
+
+/* Wochennavigator */
+.wk-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.wk-nav-btn{width:34px;height:34px;border:0.5px solid var(--border-md);border-radius:9px;background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wk-nav-btn:active{background:var(--surface2)}
+.wk-nav-btn:disabled{opacity:.3;cursor:default}
+.wk-nav-btn svg{width:16px;height:16px;stroke:var(--text-muted);stroke-width:2.2;fill:none}
+.wk-nav-label{flex:1;text-align:center;cursor:pointer}
+.wk-nav-main{font-size:15px;font-weight:600}
+.wk-nav-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+.wk-past-note{background:var(--surface2);border-radius:var(--r-sm);padding:8px 12px;font-size:12px;color:var(--text-muted);margin-bottom:12px}
+
+/* ===== AUFGABEN ===== */
+.task-group-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.task-group-title span{background:var(--surface2);padding:1px 7px;border-radius:20px;font-size:10px}
+.task-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:11px}
+.task-card.done{opacity:.62}
+.task-check{width:26px;height:26px;border-radius:50%;border:1.8px solid var(--border-md);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0}
+.task-check:active{transform:scale(.9)}
+.task-check.on{background:var(--green);border-color:var(--green)}
+.task-check svg{width:13px;height:13px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
+.task-check.on svg{opacity:1}
+.task-main{flex:1;min-width:0}
+.task-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.3;word-break:break-word}
+.task-card.done .task-title{text-decoration:line-through;text-decoration-color:var(--text-hint)}
+.task-meta{font-size:12px;color:var(--text-muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.task-pts{font-size:10px;font-weight:700;background:var(--green-light);color:var(--green-text);padding:2px 7px;border-radius:20px;flex-shrink:0}
+.task-by{font-size:10px;font-weight:600;background:var(--surface2);color:var(--text-muted);padding:2px 7px;border-radius:20px}
+.task-del{width:28px;height:28px;border:0.5px solid var(--border-md);border-radius:8px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.task-del:active{background:var(--surface2)}
+.task-del svg{width:12px;height:12px;stroke:var(--text-muted);stroke-width:2;fill:none}
+
+/* Punktestand */
+.score-hero{background:var(--green);color:#fff;border-radius:var(--r);padding:16px 18px;margin-bottom:12px}
+.score-hero-lbl{font-size:12px;opacity:.85;margin-bottom:2px}
+.score-hero-val{font-size:30px;font-weight:700;line-height:1}
+.score-hero-sub{font-size:12px;opacity:.85;margin-top:5px}
+.lb-row{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px}
+.lb-rank{width:24px;height:24px;border-radius:50%;background:var(--surface2);color:var(--text-muted);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lb-rank.top{background:var(--green);color:#fff}
+.lb-name{flex:1;font-size:14px;font-weight:500;word-break:break-word}
+.lb-name.me{color:var(--green-text);font-weight:700}
+.lb-pts{font-size:14px;font-weight:700;color:var(--text)}
+.lb-week{font-size:11px;color:var(--text-muted);margin-left:6px}
+.rw-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:11px}
+.rw-main{flex:1;min-width:0}
+.rw-title{font-size:14px;font-weight:500;word-break:break-word}
+.rw-bar-wrap{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:6px}
+.rw-bar{height:5px;background:var(--green);border-radius:3px;transition:width .3s}
+.rw-sub{font-size:12px;color:var(--text-muted);margin-top:4px}
+.btn-redeem{padding:7px 13px;border:0.5px solid var(--green);border-radius:20px;background:none;color:var(--green);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.btn-redeem:active{background:var(--green-light)}
+.btn-redeem:disabled{opacity:.35;cursor:default;border-color:var(--border-md);color:var(--text-muted)}
+.preset-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:0.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;margin-bottom:5px}
+.preset-item.sel{border-color:var(--green);background:var(--green-light)}
+.preset-item:active{background:var(--surface2)}
+.wd-pick{display:flex;flex-wrap:wrap;gap:5px}
+.wd-opt{width:38px;height:36px;border:0.5px solid var(--border-md);border-radius:9px;background:none;font-size:12px;color:var(--text-muted);cursor:pointer;font-weight:500}
+.wd-opt.sel{background:var(--green);color:#fff;border-color:var(--green);font-weight:700}
+.task-cal-line{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.task-cal-line:last-child{border-bottom:none}
+
+/* ===== WÜNSCHE ===== */
+.wish-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wish-name{font-size:14px;color:var(--text);word-break:break-word}
+.wish-by{font-size:12px;color:var(--text-muted)}
+.wish-actions{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.btn-wish-add{padding:7px 12px;border:0.5px solid var(--green);border-radius:20px;background:none;color:var(--green);font-size:12px;cursor:pointer;white-space:nowrap}
+.btn-wish-add:active{background:var(--green-light)}
+.btn-wish-del{padding:7px 11px;border:0.5px solid var(--border-md);border-radius:20px;background:none;color:var(--red);font-size:12px;cursor:pointer}
+.btn-wish-del:active{background:var(--red-light)}
+
+/* ===== SHEETS ===== */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);border-radius:22px 22px 0 0;padding:14px 14px calc(var(--sb) + 14px);width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;animation:su .2s ease-out;overflow-y:auto}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-drag{padding:2px 0 12px;margin:-2px 0 0;cursor:grab;touch-action:none;flex-shrink:0}
+.sheet-drag:active{cursor:grabbing}
+.sheet-handle{width:38px;height:4px;background:var(--border-md);border-radius:2px;margin:8px auto 0;transition:background .15s,width .15s}
+.sheet-drag:active .sheet-handle{background:var(--text-muted);width:46px}
+.sheet.dragging{transition:none}
+.sheet.snapping{transition:transform .22s cubic-bezier(.2,.8,.3,1)}
+.sheet-title{font-size:16px;font-weight:600;margin-bottom:4px;padding:0 4px}
+.sheet-sub{font-size:12px;color:var(--text-muted);margin-bottom:12px;padding:0 4px}
+.sheet-list{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:5px;min-height:0}
+.pick-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:0.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:background .1s}
+.pick-item:active{background:var(--surface2)}
+.pick-item.sel{border-color:var(--green);background:var(--green-light)}
+.pick-item.disabled{opacity:.4;pointer-events:none}
+.pick-thumb{width:36px;height:36px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.pick-thumb img{width:36px;height:36px;object-fit:cover}
+.pick-name{font-size:14px;color:var(--text);flex:1;word-break:break-word}
+.day-pick-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border:0.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;margin-bottom:5px}
+.day-pick-item:active{background:var(--surface2)}
+.day-pick-item.full{opacity:.4;pointer-events:none}
+.btn-cancel{margin-top:8px;padding:13px;border:0.5px solid var(--border-md);border-radius:var(--r-sm);background:none;color:var(--red);font-size:15px;font-weight:500;cursor:pointer;width:100%;flex-shrink:0}
+.btn-cancel:active{background:var(--red-light)}
+.sheet-btn-row{display:flex;gap:8px;margin-top:16px;flex-shrink:0}
+.edit-img-row{display:flex;align-items:center;gap:12px}
+.edit-img-preview{width:56px;height:56px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;border:0.5px solid var(--border)}
+.edit-img-preview img{width:56px;height:56px;object-fit:cover}
+
+/* ===== MISC ===== */
+.empty{text-align:center;padding:40px 16px;color:var(--text-muted);font-size:14px}
+.empty svg{width:44px;height:44px;stroke:var(--text-hint);stroke-width:1.2;fill:none;display:block;margin:0 auto 10px}
+#toast{position:fixed;bottom:calc(var(--sb) + 20px);left:50%;transform:translateX(-50%) translateY(30px);background:#1c1c1a;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;pointer-events:none;opacity:0;transition:all .25s;z-index:9999;max-width:90vw;text-align:center}
+@media(prefers-color-scheme:dark){#toast{background:#3a3a38}}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#dev-banner{display:none;position:fixed;bottom:calc(var(--sb) + 8px);right:12px;background:#7c3aed;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;z-index:9998;letter-spacing:.5px}
+#update-banner{display:none;position:fixed;top:calc(var(--st) + 8px);left:50%;transform:translateX(-50%);background:#1c1c1a;color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:9997;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:90vw}
+#update-banner.show{display:flex}
+#update-banner button{padding:5px 12px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:13px;cursor:pointer;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-icon">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/>
+      <path d="M9.5 21v-5a2.5 2.5 0 0 1 5 0v5"/>
+    </svg>
+  </div>
+  <h1>Mastaler App</h1>
+  <p>Essensplan und Termine<br>für die ganze Familie.</p>
+  <input type="text" id="name-input" placeholder="Dein Name" maxlength="20" onkeydown="if(event.key==='Enter')enterApp()">
+  <button class="btn-primary" onclick="enterApp()">Loslegen</button>
+  <p class="admin-hint">Du bist der Admin? <button class="admin-link" onclick="showAdminPin()">Admin-Bereich öffnen</button></p>
+</div>
+
+<!-- ADMIN PIN (Splash) -->
+<div class="pin-overlay" id="admin-overlay">
+  <div class="pin-box">
+    <h2>Admin-Zugang</h2>
+    <p>Kennwort eingeben um Gerichte, Wochenplan und Aufgaben zu verwalten.</p>
+    <p class="pin-err" id="pin-error">Kennwort stimmt nicht.</p>
+    <input type="password" id="pin-input" placeholder="Kennwort" maxlength="64" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPin()">
+    <div class="pin-row">
+      <button class="btn-sec" onclick="closeAdminPin()">Abbrechen</button>
+      <button class="btn-primary" style="flex:1" onclick="checkPin()">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PIN (In-App) -->
+<div class="pin-overlay" id="inapp-admin-overlay">
+  <div class="pin-box">
+    <h2>Admin-Login</h2>
+    <p>Kennwort eingeben um in den Admin-Modus zu wechseln.</p>
+    <p class="pin-err" id="inapp-pin-error">Kennwort stimmt nicht.</p>
+    <input type="password" id="inapp-pin-input" placeholder="Kennwort" maxlength="64" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkInAppPin()">
+    <div class="pin-row">
+      <button class="btn-sec" onclick="closeInAppPin()">Abbrechen</button>
+      <button class="btn-primary" style="flex:1" onclick="checkInAppPin()">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="header" id="app-header">
+    <div class="header-row">
+      <div class="header-avatar" id="user-avatar" onclick="avatarClick()" title="Admin-Modus">?</div>
+      <div class="header-text">
+        <h1 id="user-name-display">Mastaler <span class="badge-admin" id="admin-badge" style="display:none">Admin</span></h1>
+        <p id="header-sub">–</p>
+      </div>
+      <div class="bell-wrap">
+        <button class="btn-icon" onclick="openActivity()" title="Was ist neu">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="bell-dot" id="bell-dot"></span>
+      </div>
+      <button class="btn-icon" onclick="refresh()" title="Aktualisieren">
+        <svg viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-bar" id="admin-bar">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span style="flex:1" id="admin-bar-text">Admin-Modus aktiv</span>
+    <button onclick="openTools()" style="background:none;border:0.5px solid var(--orange);border-radius:12px;color:var(--orange-text);font-size:11px;font-weight:600;padding:3px 10px;cursor:pointer">Werkzeuge</button>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" id="tb-cal" onclick="switchTab('cal')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18" stroke-linecap="round"/></svg>
+      Kalender<span class="tab-dot" id="cal-dot"></span>
+    </button>
+    <button class="tab" id="tb-week" onclick="switchTab('week')">
+      <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3" stroke-linecap="round"/></svg>
+      Essen<span class="tab-dot" id="week-dot"></span>
+    </button>
+    <button class="tab" id="tb-tasks" onclick="switchTab('tasks')">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-linecap="round"/></svg>
+      Aufgaben<span class="tab-dot" id="task-dot"></span>
+    </button>
+    <button class="tab" id="tb-wishes" onclick="switchTab('wishes')">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Wünsche<span class="tab-dot" id="wish-dot"></span>
+    </button>
+    <button class="tab" id="tb-dishes" onclick="switchTab('dishes')">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-linecap="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke-linejoin="round"/><path d="M9 7h7M9 11h5" stroke-linecap="round"/></svg>
+      Gerichte
+    </button>
+  </div>
+
+  <!-- ===== KALENDER ===== -->
+  <div class="section active" id="tab-cal">
+    <div class="seg">
+      <button id="cs-month" class="active" onclick="switchCalView('month')">Monat</button>
+      <button id="cs-list" onclick="switchCalView('list')">Kommend</button>
+    </div>
+
+    <div id="cal-month-view">
+      <div class="cal-head">
+        <button class="cal-nav" onclick="calShift(-1)" title="Vorheriger Monat">
+          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="cal-month" id="cal-month-label" onclick="goToday()" title="Zu heute springen" style="cursor:pointer">–</div>
+        <button class="cal-nav" onclick="calShift(1)" title="Nächster Monat">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-wd"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+      <div id="day-panel"></div>
+    </div>
+
+    <div id="cal-list-view" style="display:none">
+      <div class="upcoming-title">Nächste 60 Tage</div>
+      <div id="upcoming-list"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn-wk green" onclick="openEventSheet(null)">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Termin
+      </button>
+      <button class="btn-wk" onclick="exportICS()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/></svg>Export
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== ESSEN ===== -->
+  <div class="section" id="tab-week">
+    <div class="seg">
+      <button id="es-plan" class="active" onclick="switchEatView('plan')">Plan</button>
+      <button id="es-shop" onclick="switchEatView('shop')">Einkauf</button>
+      <button id="es-hist" onclick="switchEatView('hist')">Verlauf</button>
+    </div>
+
+    <div id="eat-plan-view">
+      <div class="wk-nav">
+        <button class="wk-nav-btn" onclick="shiftWeek(-1)" title="Woche zurück">
+          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="wk-nav-label" onclick="goCurrentWeek()" title="Zur aktuellen Woche">
+          <div class="wk-nav-main" id="wk-main">–</div>
+          <div class="wk-nav-sub" id="wk-sub">–</div>
+        </div>
+        <button class="wk-nav-btn" onclick="shiftWeek(1)" title="Woche vor">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div id="week-content"></div>
+    </div>
+
+    <div id="eat-shop-view" style="display:none">
+      <div class="card">
+        <span class="card-label">Auf die Liste</span>
+        <div class="row">
+          <input type="text" class="inp" id="shop-inp" placeholder="z.B. Milch" maxlength="60" onkeydown="if(event.key==='Enter')addShopItem()">
+          <button class="btn-add" onclick="addShopItem()" title="Hinzufügen"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn-wk green" onclick="fillFromWeek()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Aus Wochenplan</button>
+        <button class="btn-wk" onclick="clearDoneShop()"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round"/></svg>Erledigte weg</button>
+      </div>
+      <div id="shop-list"></div>
+    </div>
+
+    <div id="eat-hist-view" style="display:none">
+      <div id="hist-content"></div>
+    </div>
+  </div>
+
+  <!-- ===== AUFGABEN ===== -->
+  <div class="section" id="tab-tasks">
+    <div class="seg">
+      <button id="ts-week" class="active" onclick="switchTaskView('week')">Diese Woche</button>
+      <button id="ts-score" onclick="switchTaskView('score')">Punkte</button>
+    </div>
+
+    <div id="task-week-view">
+      <div id="task-admin-actions" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn-wk green" onclick="openTaskSheet(null)"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Aufgabe</button>
+          <button class="btn-wk" onclick="openPresets()"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round"/></svg>Vorlagen</button>
+        </div>
+      </div>
+      <div id="task-list"></div>
+    </div>
+
+    <div id="task-score-view" style="display:none">
+      <div id="score-content"></div>
+    </div>
+  </div>
+
+  <!-- ===== WÜNSCHE ===== -->
+  <div class="section" id="tab-wishes">
+    <div class="card" id="wish-form">
+      <span class="card-label">Gericht wünschen</span>
+      <div class="row">
+        <input type="text" class="inp" id="wish-inp" placeholder="z.B. Lasagne" maxlength="60" onkeydown="if(event.key==='Enter')addWish()">
+        <button class="btn-add" onclick="addWish()" title="Wunsch senden"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Der Admin entscheidet, ob dein Wunsch in die Abstimmung kommt.</p>
+    </div>
+    <div id="wishes-list"></div>
+    <div id="wishes-empty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Noch keine Wünsche
+    </div>
+  </div>
+
+  <!-- ===== GERICHTE ===== -->
+  <div class="section" id="tab-dishes">
+    <div class="card" id="dish-form" style="display:none">
+      <span class="card-label">Neues Gericht</span>
+      <div class="row">
+        <input type="text" class="inp" id="dish-name-inp" placeholder="Gerichtname" maxlength="60" onkeydown="if(event.key==='Enter')addDish()">
+        <button class="btn-add" onclick="addDish()" title="Gericht hinzufügen"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="file-btn" onclick="document.getElementById('img-inp').click()">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span id="img-btn-lbl">Foto hinzufügen (optional)</span>
+        </button>
+        <div id="img-preview" style="display:none"><img id="preview-img" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover"></div>
+        <input type="file" accept="image/*" id="img-inp" style="display:none" onchange="previewImg(this)">
+      </div>
+      <label class="f-label">Zutaten für die Einkaufsliste (optional, eine pro Zeile)</label>
+      <textarea class="inp" id="dish-ing" placeholder="Hackfleisch&#10;Passierte Tomaten&#10;Zwiebeln" maxlength="600" style="min-height:70px"></textarea>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <input type="text" class="inp" id="dish-filter" placeholder="Gericht suchen" oninput="renderDishes()">
+    </div>
+    <div id="dish-grid" class="dish-grid"></div>
+    <div id="dishes-empty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v5H3zM6 8v13M18 8v13M3 21h18M10 12h4"/></svg>
+      Noch keine Gerichte
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHEET: Termin anlegen/bearbeiten ===== -->
+<div class="overlay" id="event-overlay" onclick="overlayBg(event,'event-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title" id="event-sheet-title">Neuer Termin</div>
+    <label class="f-label">Titel</label>
+    <input type="text" class="inp" id="ev-title" placeholder="z.B. Zahnarzt Noel" maxlength="80">
+    <label class="f-label">Kategorie</label>
+    <div class="cat-pick" id="ev-cat-pick"></div>
+    <label class="f-label">Datum</label>
+    <input type="date" class="inp" id="ev-date">
+    <label class="chk-row"><input type="checkbox" id="ev-allday" onchange="toggleAllDay()"><span>Ganztägig</span></label>
+    <div id="ev-time-block">
+      <label class="f-label">Uhrzeit</label>
+      <div class="time-row">
+        <input type="time" class="inp" id="ev-start">
+        <span style="color:var(--text-muted);font-size:13px">bis</span>
+        <input type="time" class="inp" id="ev-end">
+      </div>
+    </div>
+    <label class="chk-row"><input type="checkbox" id="ev-yearly"><span>Jedes Jahr wiederholen (z.B. Geburtstag)</span></label>
+    <label class="f-label">Wen betrifft es? (optional)</label>
+    <input type="text" class="inp" id="ev-person" placeholder="z.B. Noel" maxlength="40">
+    <label class="f-label">Notiz (optional)</label>
+    <textarea class="inp" id="ev-notes" placeholder="Details, Adresse, Mitbringsel" maxlength="500"></textarea>
+    <p class="pin-err" id="ev-error" style="margin-top:10px"></p>
+    <div class="sheet-btn-row">
+      <button class="btn-cancel" style="margin-top:0;flex:1" onclick="closeEventSheet()">Abbrechen</button>
+      <button class="btn-primary" style="flex:2" onclick="saveEvent()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHEET: Aufgabe ===== -->
+<div class="overlay" id="task-overlay" onclick="overlayBg(event,'task-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title" id="task-sheet-title">Neue Aufgabe</div>
+    <label class="f-label">Was ist zu tun?</label>
+    <input type="text" class="inp" id="tk-title" placeholder="z.B. Müll rausbringen" maxlength="70">
+    <label class="f-label">Wie oft?</label>
+    <div class="cat-pick">
+      <button type="button" class="cat-opt" id="tk-r-weekly" onclick="pickRecur('weekly')">Jede Woche</button>
+      <button type="button" class="cat-opt" id="tk-r-once" onclick="pickRecur('once')">Einmalig</button>
+    </div>
+    <div id="tk-weekday-block">
+      <label class="f-label">An welchem Tag?</label>
+      <div class="wd-pick" id="tk-wd-pick"></div>
+    </div>
+    <div id="tk-date-block" style="display:none">
+      <label class="f-label">Bis wann?</label>
+      <input type="date" class="inp" id="tk-date">
+    </div>
+    <label class="f-label">Punkte</label>
+    <div class="cat-pick" id="tk-pts-pick"></div>
+    <label class="f-label">Fest zugewiesen an (optional)</label>
+    <input type="text" class="inp" id="tk-assignee" placeholder="leer = jeder darf" maxlength="30">
+    <p class="pin-err" id="tk-error" style="margin-top:10px"></p>
+    <div class="sheet-btn-row">
+      <button class="btn-cancel" style="margin-top:0;flex:1" onclick="closeTaskSheet()">Abbrechen</button>
+      <button class="btn-primary" style="flex:2" onclick="saveTask()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHEET: Vorlagen ===== -->
+<div class="overlay" id="preset-overlay" onclick="overlayBg(event,'preset-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title">Haushalts-Vorlagen</div>
+    <div class="sheet-sub">Antippen zum Auswählen, dann übernehmen.</div>
+    <div class="sheet-list" id="preset-list"></div>
+    <div class="sheet-btn-row">
+      <button class="btn-cancel" style="margin-top:0;flex:1" onclick="closePresets()">Abbrechen</button>
+      <button class="btn-primary" style="flex:2" onclick="addPresets()" id="preset-btn">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHEET: Belohnung ===== -->
+<div class="overlay" id="reward-overlay" onclick="overlayBg(event,'reward-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title">Neue Belohnung</div>
+    <label class="f-label">Belohnung</label>
+    <input type="text" class="inp" id="rw-title" placeholder="z.B. Kinoabend aussuchen" maxlength="60">
+    <label class="f-label">Kosten in Punkten</label>
+    <input type="number" class="inp" id="rw-cost" min="1" max="9999" value="50" inputmode="numeric">
+    <p class="pin-err" id="rw-error" style="margin-top:10px"></p>
+    <div class="sheet-btn-row">
+      <button class="btn-cancel" style="margin-top:0;flex:1" onclick="closeRewardSheet()">Abbrechen</button>
+      <button class="btn-primary" style="flex:2" onclick="saveReward()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHEET: Optionen wählen ===== -->
+<div class="overlay" id="picker-overlay" onclick="overlayBg(event,'picker-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title" id="picker-title">Optionen wählen</div>
+    <div class="sheet-sub" id="picker-sub">–</div>
+    <input type="text" class="inp" id="picker-search" placeholder="Gericht suchen" oninput="renderPickerList()" style="margin-bottom:10px">
+    <div class="sheet-list" id="picker-list"></div>
+    <button class="btn-cancel" onclick="closePicker()">Fertig</button>
+  </div>
+</div>
+
+<!-- ===== SHEET: Wunsch zu Tag ===== -->
+<div class="overlay" id="wish-day-overlay" onclick="overlayBg(event,'wish-day-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title" id="wish-day-title">Zu welchem Tag?</div>
+    <div class="sheet-sub" id="wish-day-sub">–</div>
+    <div class="sheet-list" id="wish-day-list"></div>
+    <button class="btn-cancel" onclick="closeWishDayPicker()">Abbrechen</button>
+  </div>
+</div>
+
+<!-- ===== SHEET: Gericht bearbeiten ===== -->
+<div class="overlay" id="edit-overlay" onclick="overlayBg(event,'edit-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title">Gericht bearbeiten</div>
+    <label class="f-label">Name</label>
+    <input type="text" class="inp" id="edit-name-inp" placeholder="Gerichtname" maxlength="60" onkeydown="if(event.key==='Enter')saveEdit()">
+    <label class="f-label">Foto</label>
+    <div class="edit-img-row">
+      <div class="edit-img-preview" id="edit-img-preview"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <button class="file-btn" onclick="document.getElementById('edit-img-inp').click()">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span id="edit-img-lbl">Foto ändern</span>
+        </button>
+        <button class="file-btn" id="edit-remove-img-btn" onclick="removeEditImg()" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>Foto entfernen
+        </button>
+      </div>
+      <input type="file" accept="image/*" id="edit-img-inp" style="display:none" onchange="editPreviewImg(this)">
+    </div>
+    <label class="f-label">Zutaten (eine pro Zeile)</label>
+    <textarea class="inp" id="edit-ing" placeholder="Hackfleisch&#10;Passierte Tomaten&#10;Zwiebeln" maxlength="600" style="min-height:80px"></textarea>
+    <div class="sheet-btn-row">
+      <button class="btn-cancel" style="margin-top:0;flex:1" onclick="closeEdit()">Abbrechen</button>
+      <button class="btn-primary" style="flex:2" onclick="saveEdit()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHEET: Admin-Werkzeuge ===== -->
+<div class="overlay" id="tools-overlay" onclick="overlayBg(event,'tools-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title">Admin-Werkzeuge</div>
+    <div class="sheet-sub" id="tools-sub">–</div>
+    <div class="sheet-list">
+      <div class="pick-item" onclick="exportBackup()">
+        <div class="pick-thumb"><svg width="18" height="18" viewBox="0 0 24 24" stroke="var(--text-muted)" stroke-width="1.8" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="flex:1">
+          <div class="pick-name">Backup herunterladen</div>
+          <div style="font-size:12px;color:var(--text-muted)">Alles inklusive Bilder als JSON-Datei</div>
+        </div>
+      </div>
+      <div class="pick-item" onclick="document.getElementById('restore-inp').click()">
+        <div class="pick-thumb"><svg width="18" height="18" viewBox="0 0 24 24" stroke="var(--text-muted)" stroke-width="1.8" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="flex:1">
+          <div class="pick-name">Backup einspielen</div>
+          <div style="font-size:12px;color:var(--text-muted)">Ersetzt den gesamten aktuellen Stand</div>
+        </div>
+      </div>
+      <div class="pick-item" onclick="closeTools();showAdminSecretHelper()">
+        <div class="pick-thumb"><svg width="18" height="18" viewBox="0 0 24 24" stroke="var(--text-muted)" stroke-width="1.8" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke-linecap="round"/></svg></div>
+        <div style="flex:1">
+          <div class="pick-name">Admin-Kennwort ändern</div>
+          <div style="font-size:12px;color:var(--text-muted)" id="tools-pw-sub">Neues Kennwort erzeugen und hinterlegen</div>
+        </div>
+      </div>
+      <div class="pick-item" onclick="manualImport()">
+        <div class="pick-thumb"><svg width="18" height="18" viewBox="0 0 24 24" stroke="var(--text-muted)" stroke-width="1.8" fill="none"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="flex:1">
+          <div class="pick-name">Alte Daten suchen</div>
+          <div style="font-size:12px;color:var(--text-muted)">In früheren Speicherpfaden nachsehen</div>
+        </div>
+      </div>
+      <div class="pick-item" onclick="closeTools();adminLogout()">
+        <div class="pick-thumb"><svg width="18" height="18" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="1.8" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="flex:1">
+          <div class="pick-name" style="color:var(--red)">Admin-Modus verlassen</div>
+        </div>
+      </div>
+    </div>
+    <input type="file" accept="application/json,.json" id="restore-inp" style="display:none" onchange="importBackup(this)">
+    <button class="btn-cancel" onclick="closeTools()">Schließen</button>
+  </div>
+</div>
+
+<!-- ===== SHEET: Aktivität ===== -->
+<div class="overlay" id="activity-overlay" onclick="overlayBg(event,'activity-overlay')">
+  <div class="sheet">
+    <div class="sheet-drag"><div class="sheet-handle"></div></div>
+    <div class="sheet-title">Was ist passiert</div>
+    <div class="sheet-sub" id="activity-sub">–</div>
+    <div class="sheet-list" id="activity-list"></div>
+    <button class="btn-cancel" onclick="closeActivity()">Schließen</button>
+  </div>
+</div>
+
+<div id="offline-bar">Offline</div>
+<div id="toast"></div>
+<div id="dev-banner">DEV</div>
+<div id="update-banner"><span>Update verfügbar</span><button onclick="applyUpdate()">Jetzt laden</button></div>
+<script>
+/* ==================================================
+   MASTALER APP
+   Einzelfamilien-Version mit Kalender
+   ================================================== */
+
+// ===== KONFIGURATION =====
+// Notfall-PIN. Gilt NUR solange in Firebase unter mastaler/config kein Hash hinterlegt ist.
+// Sobald dort etwas steht, ist dieser Wert wirkungslos.
+const ADMIN_PIN_FALLBACK = '1234';
+const CONFIG_PATH = 'mastaler/config';
+const IS_DEV = ['localhost','127.0.0.1'].includes(location.hostname);
+const FB_PROD = 'https://gerichtefamilienplan-default-rtdb.europe-west1.firebasedatabase.app';
+const FB_DEV  = 'https://gerichtefamilienplan-dev-default-rtdb.europe-west1.firebasedatabase.app';
+const FB_BASE = IS_DEV ? FB_DEV : FB_PROD;
+const DATA_PATH = 'mastaler/data';        // eine Familie, ein Pfad
+// Alt-Pfade aus früheren Versionen - werden beim Admin-Start einmalig geprüft
+const LEGACY_PATHS = ['families/mastaler/data','familienplan','families/mastaler','mastaler'];
+const IMG_PATH = 'mastaler/images';       // Bilder getrennt vom Poll-Datensatz
+const MAX_OPTIONS = 3;
+const POLL_MS = 15000;
+
+// Google-Kalender Stufe B: hier später die OAuth-Client-ID eintragen
+const GOOGLE_CLIENT_ID = '';              // z.B. '1234-abc.apps.googleusercontent.com'
+
+// ===== KONSTANTEN =====
+const DAYS   = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+const DAYS_S = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const MONTHS_S = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const CATS = {
+  termin:     { label:'Termin',     c:'--cat-termin',     b:'--cat-termin-bg' },
+  geburtstag: { label:'Geburtstag', c:'--cat-geburtstag', b:'--cat-geburtstag-bg' },
+  schule:     { label:'Schule',     c:'--cat-schule',     b:'--cat-schule-bg' },
+  arbeit:     { label:'Arbeit',     c:'--cat-arbeit',     b:'--cat-arbeit-bg' },
+  urlaub:     { label:'Urlaub',     c:'--cat-urlaub',     b:'--cat-urlaub-bg' },
+  sonstiges:  { label:'Sonstiges',  c:'--cat-sonstiges',  b:'--cat-sonstiges-bg' }
+};
+const CAT_KEYS = Object.keys(CATS);
+
+// ===== ZUSTAND =====
+let userName = '', isAdmin = false;
+let currentTab = 'cal';
+let calCursor = new Date();      // welcher Monat wird angezeigt
+let selectedDate = null;         // 'YYYY-MM-DD'
+let calView = 'month';
+let editingEventId = null;
+let evCat = 'termin';
+let weekOffset = 0;          // 0 = laufende Woche, negativ = Archiv
+let eatView = 'plan';
+let pickerDay = -1, pickerWeekKey = '';
+let pendingImg = null;
+let editingId = null, editPendingImg;
+let wishForId = null, wishForWeekKey = '';
+
+let shared = { dishes:[], weeks:{}, votes:{}, wishes:[], events:[], tasks:[], done:{}, rewards:[], redeemed:[], shop:[], log:[] };
+
+// Aufgaben-Zustand
+let taskView = 'week';
+let editingTaskId = null;
+let tkRecur = 'weekly', tkWeekday = 0, tkPoints = 5;
+let presetSel = new Set();
+
+const TASK_PRESETS = [
+  { title:'Müll rausbringen',        wd:0, pts:5  },
+  { title:'Altglas und Papier wegbringen', wd:1, pts:5  },
+  { title:'Pflanzen gießen',         wd:2, pts:3  },
+  { title:'Wäsche waschen',          wd:3, pts:10 },
+  { title:'Küche gründlich putzen',  wd:4, pts:10 },
+  { title:'Kühlschrank ausräumen',   wd:4, pts:5  },
+  { title:'Bad putzen',              wd:5, pts:10 },
+  { title:'Staubsaugen',             wd:5, pts:10 },
+  { title:'Boden wischen',           wd:5, pts:10 },
+  { title:'Staub wischen',           wd:5, pts:5  },
+  { title:'Bettwäsche wechseln',     wd:6, pts:10 },
+  { title:'Spülmaschine ausräumen',  wd:6, pts:3  }
+];
+const POINT_STEPS = [3,5,10,15,20];
+
+// ==================================================
+//  DATUM
+// ==================================================
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dateKey(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function parseKey(k){ const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d,12); }
+function todayKey(){ return dateKey(new Date()); }
+
+function getWeekKey(offset=0, base){
+  const d = base ? new Date(base) : new Date();
+  d.setHours(12,0,0,0);
+  d.setDate(d.getDate() + offset*7);
+  const t = new Date(d);
+  t.setDate(t.getDate() + 3 - ((t.getDay()+6)%7));       // Donnerstag der Woche
+  const year = t.getFullYear();
+  const jan4 = new Date(year,0,4,12);
+  const w1 = new Date(jan4);
+  w1.setDate(jan4.getDate() - ((jan4.getDay()+6)%7));
+  const num = 1 + Math.round((t - w1) / (7*86400000));
+  return `${year}-W${pad2(num)}`;
+}
+function activeWeekKey(){ return getWeekKey(weekOffset); }
+function isPastWeek(){ return weekOffset < 0; }
+function weekRangeLabel(wk){
+  const m = mondayOfWeekKey(wk);
+  const s = new Date(m); const e = new Date(m); e.setDate(e.getDate()+6);
+  return `${s.getDate()}.${s.getMonth()+1}. – ${e.getDate()}.${e.getMonth()+1}.`;
+}
+function weekLabel(k){ const [y,w]=k.split('-W'); return `KW ${w}/${y}`; }
+
+// Montag einer Woche als Date
+function mondayOfWeekKey(key){
+  const [y,w] = key.split('-W').map(Number);
+  const jan4 = new Date(y,0,4,12);
+  const w1 = new Date(jan4);
+  w1.setDate(jan4.getDate() - ((jan4.getDay()+6)%7));
+  w1.setDate(w1.getDate() + (w-1)*7);
+  return w1;
+}
+// Datum-Key für Tag i (0=Mo) einer Wochen-Keys
+function dateKeyForWeekDay(weekKey, i){
+  const m = mondayOfWeekKey(weekKey);
+  m.setDate(m.getDate()+i);
+  return dateKey(m);
+}
+function ensureWeek(k){
+  if(!shared.weeks[k]) shared.weeks[k] = { days: Array.from({length:7},()=>({options:[],final:null})) };
+  return shared.weeks[k];
+}
+function fmtDateLong(k){
+  const d = parseKey(k);
+  return `${DAYS[(d.getDay()+6)%7]}, ${d.getDate()}. ${MONTHS[d.getMonth()]}`;
+}
+
+// ==================================================
+//  BILDER (getrennt gespeichert, damit der Poll klein bleibt)
+// ==================================================
+const imgMem = {};                         // id -> dataURL, nur zur Laufzeit
+const imgKey = id => 'mst_img_' + id;
+
+function imgFromLocal(id){
+  if(imgMem[id] !== undefined) return imgMem[id];
+  try{
+    const v = localStorage.getItem(imgKey(id));
+    if(v){ imgMem[id] = v; return v; }
+  }catch(e){}
+  return null;
+}
+function imgToLocal(id, data){
+  imgMem[id] = data;
+  try{
+    if(data === null) localStorage.removeItem(imgKey(id));
+    else localStorage.setItem(imgKey(id), data);
+  }catch(e){ /* Speicher voll - Bild bleibt nur im Arbeitsspeicher */ }
+}
+// Fehlende Bilder einmalig nachladen, danach kommen sie aus dem Cache
+async function ensureImages(){
+  const missing = shared.dishes.filter(d => d.hasImg && !d.img && !d._inline);
+  if(!missing.length) return false;
+  let loaded = 0;
+  for(const d of missing){
+    const local = imgFromLocal(d.id);
+    if(local){ d.img = local; loaded++; continue; }
+    try{
+      const v = await fbGet(`${IMG_PATH}/${d.id}`);
+      if(typeof v === 'string' && v.startsWith('data:')){
+        d.img = v; imgToLocal(d.id, v); loaded++;
+      }
+    }catch(e){}
+  }
+  return loaded > 0;
+}
+// Alt-Datensätze: Bilder lagen inline im Hauptobjekt
+async function migrateImages(){
+  if(!isAdmin) return false;
+  const inline = shared.dishes.filter(d => d._inline && d.img);
+  if(!inline.length) return false;
+  let n = 0, failed = 0;
+  for(const d of inline){
+    n++;
+    toast(`Bilder werden ausgelagert… ${n}/${inline.length}`);
+    const ok = await fbSet(`${IMG_PATH}/${d.id}`, d.img);
+    if(ok){ imgToLocal(d.id, d.img); d.hasImg = true; d._inline = false; }
+    else failed++;
+  }
+  if(failed === inline.length){ toast('Auslagern fehlgeschlagen – bleibt beim alten Format'); return false; }
+  await saveShared();
+  toast(failed ? `${n-failed} von ${n} ausgelagert` : `${n} Bilder ausgelagert – Datenverbrauch sinkt deutlich`);
+  return true;
+}
+
+// ==================================================
+//  FIREBASE
+// ==================================================
+async function fbGet(path){
+  const r = await fetch(`${FB_BASE}/${path}.json`);
+  if(!r.ok) throw new Error('GET '+r.status);
+  return r.json();
+}
+async function fbSet(path,val){
+  try{
+    const r = await fetch(`${FB_BASE}/${path}.json`,{
+      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(val)
+    });
+    if(!r.ok){ console.error('fbSet',r.status); toast('Speichern fehlgeschlagen ('+r.status+')'); return false; }
+    setOffline(false);
+    return true;
+  }catch(e){
+    setOffline(true);
+    toast('Keine Verbindung – Änderung nicht gespeichert');
+    return false;
+  }
+}
+
+function normalize(data){
+  data = data || {};
+  shared.dishes = Array.isArray(data.dishes) ? data.dishes : [];
+  shared.wishes = Array.isArray(data.wishes) ? data.wishes : [];
+  shared.events = Array.isArray(data.events) ? data.events : [];
+  shared.tasks    = Array.isArray(data.tasks) ? data.tasks : [];
+  shared.rewards  = Array.isArray(data.rewards) ? data.rewards : [];
+  shared.redeemed = Array.isArray(data.redeemed) ? data.redeemed : [];
+  shared.done     = (data.done && typeof data.done==='object') ? data.done : {};
+  shared.shop     = Array.isArray(data.shop) ? data.shop : [];
+  shared.log      = Array.isArray(data.log) ? data.log : [];
+  shared.dishes.forEach(d=>{
+    if(!Array.isArray(d.ing)) d.ing = [];
+    // Bild aus dem lokalen Cache zurückspielen, damit sofort etwas zu sehen ist
+    if(d.hasImg && !d.img){ const l = imgFromLocal(d.id); if(l) d.img = l; }
+    // Alt-Format: Bild liegt noch inline. NICHT hasImg setzen - sonst hält
+    // migrateImages() es für erledigt und toWire() würde es wegwerfen.
+    d._inline = !!(d.img && !d.hasImg);
+  });
+  shared.weeks  = (data.weeks && typeof data.weeks==='object') ? data.weeks : {};
+  shared.votes  = (data.votes && typeof data.votes==='object') ? data.votes : {};
+
+  Object.keys(shared.weeks).forEach(k=>{
+    const w = shared.weeks[k];
+    if(!w || !Array.isArray(w.days) || w.days.length!==7){
+      shared.weeks[k] = { days: Array.from({length:7},()=>({options:[],final:null})) };
+    } else {
+      w.days = w.days.map(d => (d && typeof d==='object')
+        ? { options: Array.isArray(d.options)?d.options:[], final: d.final ?? null }
+        : { options:[], final:null });
+    }
+  });
+  // Verwaiste Stimmen aufräumen
+  const valid = new Set();
+  Object.keys(shared.weeks).forEach(wk=>{
+    shared.weeks[wk].days.forEach((day,i)=>(day.options||[]).forEach(id=>valid.add(`${wk}_${i}_${id}`)));
+  });
+  Object.keys(shared.votes).forEach(k=>{ if(!valid.has(k)) delete shared.votes[k]; });
+  // Events säubern
+  shared.events = shared.events.filter(e => e && e.id && e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date||''));
+  // Aufgaben säubern
+  shared.tasks = shared.tasks.filter(t => t && t.id && t.title);
+  shared.tasks.forEach(t=>{
+    if(t.recur!=='once') t.recur='weekly';
+    t.points = Number(t.points)||5;
+    if(t.recur==='weekly'){ t.weekday = Math.min(6, Math.max(0, Number(t.weekday)||0)); }
+  });
+  shared.rewards = shared.rewards.filter(r => r && r.id && r.title && Number(r.cost)>0);
+}
+
+let lastHash = '';
+async function loadShared(){
+  try{
+    const cached = localStorage.getItem('mst_cache');
+    if(cached && !lastHash){ normalize(JSON.parse(cached)); lastHash = cached; }
+  }catch(e){}
+  try{
+    const data = await fbGet(DATA_PATH);
+    const h = JSON.stringify(data);
+    const changed = h !== lastHash;
+    normalize(data);
+    try{ localStorage.setItem('mst_cache', h); }catch(e){}
+    lastHash = h;
+    await ensureImages();          // Bilder immer nachziehen, egal wer geladen hat
+    return changed;
+  }catch(e){
+    setOffline(true);
+    return false;
+  }
+}
+// Version ohne Bilddaten - genau die geht über die Leitung
+function toWire(){
+  const w = {};
+  for(const k in shared){
+    if(k === 'dishes'){
+      w.dishes = shared.dishes.map(d => {
+        const {img, _inline, ...rest} = d;
+        // Solange ein Bild noch nicht unter IMG_PATH liegt, bleibt es inline.
+        // Sonst wäre es nach dem nächsten Speichern verloren.
+        return (_inline && img) ? { ...rest, img } : rest;
+      });
+    }
+    else w[k] = shared[k];
+  }
+  return w;
+}
+async function saveShared(){
+  const wire = toWire();
+  const ok = await fbSet(DATA_PATH, wire);
+  if(ok){
+    const h = JSON.stringify(wire);
+    try{ localStorage.setItem('mst_cache', h); }catch(e){}
+    lastHash = h;
+  }
+  return ok;
+}
+// Frische Daten holen, eigene Änderung anwenden, speichern (verhindert Überschreiben)
+async function mutate(fn){
+  await loadShared();
+  fn();
+  return saveShared();
+}
+
+// ==================================================
+//  ADMIN-ZUGANG
+//  Das Kennwort steht nicht im Quelltext, sondern als Hash in Firebase
+//  unter mastaler/config. Dieser Pfad ist per Datenbankregel
+//  schreibgeschützt - sonst könnte ihn jeder überschreiben.
+// ==================================================
+let adminCfg = null;              // { hash, salt }
+let cryptoOk = !!(window.crypto && window.crypto.subtle);
+let configReady = null;           // Versprechen, damit niemand vor dem Laden prüft
+
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function loadAdminConfig(){
+  // Zuerst aus dem Zwischenspeicher, damit der Login auch offline funktioniert
+  try{
+    const c = localStorage.getItem('mst_admincfg');
+    if(c) adminCfg = JSON.parse(c);
+  }catch(e){}
+  try{
+    const cfg = await fbGet(CONFIG_PATH);
+    if(cfg && typeof cfg.adminHash === 'string' && /^[0-9a-f]{64}$/.test(cfg.adminHash)){
+      adminCfg = { hash: cfg.adminHash, salt: String(cfg.salt || 'mastaler') };
+      try{ localStorage.setItem('mst_admincfg', JSON.stringify(adminCfg)); }catch(e){}
+    }
+  }catch(e){ /* offline - Zwischenspeicher gilt */ }
+}
+async function checkAdminSecret(input){
+  input = String(input || '');
+  if(!input) return false;
+  if(configReady) await configReady;      // erst wenn die Konfiguration da ist
+  if(adminCfg && adminCfg.hash){
+    if(!cryptoOk){ toast('Verschlüsselung nicht verfügbar – Seite über https aufrufen'); return false; }
+    try{ return (await sha256Hex(adminCfg.salt + ':' + input)) === adminCfg.hash; }
+    catch(e){ return false; }
+  }
+  return input === ADMIN_PIN_FALLBACK;     // nur ohne hinterlegte Konfiguration
+}
+function adminSecretIsDefault(){ return !(adminCfg && adminCfg.hash); }
+
+// Hilfe zum Setzen eines neuen Kennworts. Eingetragen wird es in der
+// Firebase-Konsole, weil der Pfad bewusst schreibgeschützt ist.
+async function showAdminSecretHelper(){
+  if(!cryptoOk){ alert('Dafür muss die Seite über https oder localhost laufen.'); return; }
+  const pw = prompt(
+      'Neues Admin-Kennwort eingeben.\n\n'
+    + 'Der Hash ist in der Datenbank für jeden lesbar. Wie sicher das Kennwort ist,\n'
+    + 'hängt deshalb allein an seiner Länge:\n\n'
+    + '   4 Ziffern            unter einer Sekunde geknackt\n'
+    + '   6 Ziffern            unter einer Sekunde\n'
+    + '   8 Zeichen a-z0-9     rund 20 Minuten\n'
+    + '   12 Zeichen gemischt  praktisch unmöglich\n\n'
+    + 'Nimm am besten drei Wörter, z.B. "Kartoffel-Traktor-77".');
+  if(pw === null) return;
+  if(pw.length < 10){ alert('Bitte mindestens 10 Zeichen.\n\nKürzeres ist mit dem lesbaren Hash zu schnell zu erraten.'); return; }
+  if(/^\d+$/.test(pw) && pw.length < 16){ alert('Nur Ziffern ist zu schwach.\n\nBitte Buchstaben ergänzen oder mindestens 16 Ziffern verwenden.'); return; }
+  const salt = 'mastaler-' + Math.random().toString(36).slice(2,10);
+  const hash = await sha256Hex(salt + ':' + pw);
+  const json = JSON.stringify({ salt, adminHash: hash }, null, 2);
+  const text =
+    'So trägst du das Kennwort ein:\n\n'
+  + '1. console.firebase.google.com öffnen\n'
+  + '2. Projekt gerichtefamilienplan → Realtime Database\n'
+  + '3. Beim Wurzeleintrag auf das Plus, Schlüssel: mastaler\n'
+  + '   darunter einen Eintrag config anlegen\n'
+  + '4. Dort diese beiden Werte eintragen:\n\n'
+  + json + '\n\n'
+  + '5. Unter Regeln ergänzen, damit niemand den Hash überschreibt:\n\n'
+  + '"mastaler": {\n  "config": { ".read": true, ".write": false },\n  ...\n}\n\n'
+  + 'Der Text wurde in die Zwischenablage kopiert.';
+  try{ await navigator.clipboard.writeText(json); }catch(e){}
+  alert(text);
+}
+
+// ==================================================
+//  ADMIN-WERKZEUGE
+// ==================================================
+function openTools(){
+  const imgs = shared.dishes.filter(d=>d.hasImg || d._inline).length;
+  const pending = shared.dishes.filter(d=>d._inline).length;
+  document.getElementById('tools-sub').textContent =
+    `${shared.dishes.length} Gerichte (${imgs} mit Bild) · ${(shared.events||[]).length} Termine · ${(shared.tasks||[]).length} Aufgaben`
+    + (pending ? ` · ${pending} Bilder noch nicht ausgelagert` : '');
+  const sub = document.getElementById('tools-pw-sub');
+  if(adminSecretIsDefault()){
+    sub.textContent = 'Achtung: noch die Notfall-PIN aus dem Quelltext';
+    sub.style.color = 'var(--orange-text)';
+    sub.style.fontWeight = '600';
+  } else {
+    sub.textContent = 'Kennwort liegt als Hash in Firebase';
+    sub.style.color = 'var(--text-muted)';
+    sub.style.fontWeight = '';
+  }
+  resetSheet('tools-overlay');
+  document.getElementById('tools-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeTools(){
+  document.getElementById('tools-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+async function exportBackup(){
+  toast('Backup wird zusammengestellt…');
+  await ensureImages();                                  // Bilder mitnehmen
+  const payload = {
+    _format: 'mastaler-backup',
+    _version: 1,
+    _created: new Date().toISOString(),
+    data: toWire(),
+    images: {}
+  };
+  shared.dishes.forEach(d=>{
+    const v = d.img || (d.hasImg ? imgFromLocal(d.id) : null);
+    if(v) payload.images[d.id] = v;
+  });
+  const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  a.href = url;
+  a.download = `mastaler-backup-${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  const n = Object.keys(payload.images).length;
+  toast(`Backup gespeichert (${n} Bilder)`);
+}
+
+async function importBackup(inp){
+  const file = inp.files[0];
+  inp.value = '';
+  if(!file) return;
+  if(!isAdmin){ toast('Nur im Admin-Modus möglich'); return; }
+  if(file.size > 20*1024*1024){ alert('Die Datei ist über 20 MB – das ist vermutlich kein Backup dieser App.'); return; }
+  let payload;
+  try{
+    payload = JSON.parse(await file.text());
+  }catch(e){ alert('Die Datei ist keine gültige JSON-Datei.'); return; }
+
+  if(payload._format !== 'mastaler-backup' || !payload.data){
+    alert('Das ist kein Backup dieser App.'); return;
+  }
+  const d = payload.data;
+  const info = `Backup vom ${payload._created ? new Date(payload._created).toLocaleString('de-DE') : 'unbekannt'}\n\n`
+    + `  ${(d.dishes||[]).length} Gerichte\n`
+    + `  ${(d.events||[]).length} Termine\n`
+    + `  ${(d.tasks||[]).length} Aufgaben\n`
+    + `  ${Object.keys(payload.images||{}).length} Bilder\n\n`
+    + `Der aktuelle Stand (${shared.dishes.length} Gerichte, ${(shared.events||[]).length} Termine) wird vollständig ersetzt.\n\nFortfahren?`;
+  if(!confirm(info)) return;
+
+  toast('Backup wird eingespielt…');
+  const imgs = payload.images || {};
+  for(const id of Object.keys(imgs)){
+    await fbSet(`${IMG_PATH}/${id}`, imgs[id]);
+    imgToLocal(Number(id), imgs[id]);
+  }
+  normalize(d);
+  shared.dishes.forEach(x=>{ const v = imgs[x.id]; if(v){ x.img = v; x.hasImg = true; } });
+  logAdd('gericht', `Backup eingespielt (${shared.dishes.length} Gerichte)`);
+  if(await saveShared()){
+    closeTools(); renderAll();
+    toast('Backup eingespielt');
+  }
+}
+
+// ==================================================
+//  AKTIVITAETS-PROTOKOLL
+// ==================================================
+const LOG_MAX = 60;
+const LOG_KINDS = {
+  gericht:  { label:'Gericht', c:'--green',          b:'--green-light' },
+  essen:    { label:'Essen',   c:'--green',          b:'--green-light' },
+  termin:   { label:'Termin',  c:'--cat-termin',     b:'--cat-termin-bg' },
+  aufgabe:  { label:'Aufgabe', c:'--cat-schule',     b:'--cat-schule-bg' },
+  wunsch:   { label:'Wunsch',  c:'--cat-geburtstag', b:'--cat-geburtstag-bg' },
+  einkauf:  { label:'Einkauf', c:'--cat-urlaub',     b:'--cat-urlaub-bg' }
+};
+// Wird INNERHALB von mutate() aufgerufen, damit Eintrag und Änderung zusammen gespeichert werden
+function logAdd(kind, text){
+  if(!Array.isArray(shared.log)) shared.log = [];
+  const last = shared.log[shared.log.length-1];
+  // Identische Meldung derselben Person innerhalb einer Minute nicht doppeln
+  if(last && last.by===userName && last.text===text && Date.now()-last.ts < 60000) return;
+  shared.log.push({ id:'g'+Date.now()+Math.random().toString(36).slice(2,5),
+                    ts:Date.now(), by:userName, kind, text });
+  if(shared.log.length > LOG_MAX) shared.log = shared.log.slice(-LOG_MAX);
+}
+function lastSeenTs(){ return Number(localStorage.getItem('mst_seen')||0); }
+function freshCount(){
+  return (shared.log||[]).filter(e => e.ts > lastSeenTs() && e.by !== userName).length;
+}
+function relTime(ts){
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s < 60) return 'gerade eben';
+  if(s < 3600) return `vor ${Math.floor(s/60)} Min.`;
+  if(s < 86400) return `vor ${Math.floor(s/3600)} Std.`;
+  const d = Math.floor(s/86400);
+  if(d === 1) return 'gestern';
+  if(d < 7) return `vor ${d} Tagen`;
+  const dt = new Date(ts);
+  return `${dt.getDate()}.${dt.getMonth()+1}.`;
+}
+function updateBell(){
+  document.getElementById('bell-dot').classList.toggle('show', freshCount() > 0);
+}
+function openActivity(){
+  const log = (shared.log||[]).slice().reverse();
+  const seen = lastSeenTs();
+  const fresh = log.filter(e => e.ts > seen && e.by !== userName).length;
+  document.getElementById('activity-sub').textContent =
+    fresh ? `${fresh} neu seit deinem letzten Blick` : 'Alles gesehen';
+
+  const el = document.getElementById('activity-list');
+  if(!log.length){
+    el.innerHTML = `<div class="empty" style="padding:24px">Noch nichts passiert.</div>`;
+  } else {
+    let out = '', divider = false;
+    log.forEach(e=>{
+      const isFresh = e.ts > seen && e.by !== userName;
+      if(!isFresh && !divider && fresh){ out += `<div class="act-new-line"><span>Älter</span><div></div></div>`; divider = true; }
+      const k = LOG_KINDS[e.kind] || LOG_KINDS.gericht;
+      out += `<div class="act-row ${isFresh?'fresh':''}">
+        <div class="act-icon" style="background:var(${k.b});color:var(${k.c})">${esc(e.by.charAt(0).toUpperCase())}</div>
+        <div class="act-main">
+          <div class="act-text">${esc(e.text)}</div>
+          <div class="act-meta">${esc(e.by)} · ${relTime(e.ts)}</div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML = out;
+  }
+  localStorage.setItem('mst_seen', String(Date.now()));
+  updateBell();
+  resetSheet('activity-overlay');
+  document.getElementById('activity-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeActivity(){
+  document.getElementById('activity-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ==================================================
+//  VERBINDUNGSZUSTAND
+// ==================================================
+let isOffline = !navigator.onLine;
+function setOffline(v){
+  if(isOffline === v) return;
+  isOffline = v;
+  document.getElementById('offline-bar').classList.toggle('show', v);
+  if(!v){
+    toast('Wieder online');
+    // Verzögert, damit kein Ladevorgang mitten in einem Schreibvorgang startet
+    setTimeout(()=>{ if(userName && !document.querySelector('.overlay.open')) refresh(); }, 800);
+  }
+}
+window.addEventListener('online',  ()=>setOffline(false));
+window.addEventListener('offline', ()=>setOffline(true));
+
+// ==================================================
+//  AUTH / START
+// ==================================================
+function enterApp(){
+  const n = document.getElementById('name-input').value.trim();
+  if(!n){ document.getElementById('name-input').focus(); toast('Bitte Namen eingeben'); return; }
+  userName = n;
+  localStorage.setItem('mst_user', n);
+  startApp();
+}
+function showAdminPin(){
+  document.getElementById('admin-overlay').classList.add('open');
+  document.getElementById('pin-error').style.display='none';
+  setTimeout(()=>document.getElementById('pin-input').focus(),120);
+}
+function closeAdminPin(){
+  document.getElementById('admin-overlay').classList.remove('open');
+  document.getElementById('pin-input').value='';
+}
+async function checkPin(){
+  const val = document.getElementById('pin-input').value;
+  if(await checkAdminSecret(val)){
+    isAdmin = true;
+    closeAdminPin();
+    userName = document.getElementById('name-input').value.trim() || 'Admin';
+    localStorage.setItem('mst_user', userName);
+    startApp();
+  } else {
+    document.getElementById('pin-error').style.display='block';
+    document.getElementById('pin-input').value='';
+    document.getElementById('pin-input').focus();
+  }
+}
+function avatarClick(){
+  if(isAdmin){ if(confirm('Admin-Modus deaktivieren?')) adminLogout(); return; }
+  document.getElementById('inapp-admin-overlay').classList.add('open');
+  document.getElementById('inapp-pin-input').value='';
+  document.getElementById('inapp-pin-error').style.display='none';
+  setTimeout(()=>document.getElementById('inapp-pin-input').focus(),120);
+}
+function closeInAppPin(){ document.getElementById('inapp-admin-overlay').classList.remove('open'); }
+async function checkInAppPin(){
+  if(await checkAdminSecret(document.getElementById('inapp-pin-input').value)){
+    closeInAppPin();
+    isAdmin = true;
+    applyAdminUI();
+    renderAll();
+    toast('Admin-Modus aktiviert');
+  } else {
+    document.getElementById('inapp-pin-error').style.display='block';
+    document.getElementById('inapp-pin-input').value='';
+    document.getElementById('inapp-pin-input').focus();
+  }
+}
+function adminLogout(){ isAdmin=false; location.reload(); }
+
+function applyAdminUI(){
+  document.getElementById('app-header').classList.toggle('admin-mode', isAdmin);
+  document.getElementById('admin-bar').classList.toggle('show', isAdmin);
+  document.getElementById('tabs').classList.toggle('with-admin-bar', isAdmin);
+  document.getElementById('admin-badge').style.display = isAdmin ? 'inline' : 'none';
+  if(isAdmin){
+    document.getElementById('admin-bar-text').textContent =
+      adminSecretIsDefault() ? 'Admin-Modus aktiv · Kennwort noch nicht gesetzt' : 'Admin-Modus aktiv';
+  }
+  document.getElementById('dish-form').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('wish-form').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('task-admin-actions').style.display = isAdmin ? 'block' : 'none';
+}
+
+// Sucht in Alt-Pfaden nach Daten und bietet den Import an
+async function scanLegacy(){
+  const found = [];
+  for(const p of LEGACY_PATHS){
+    if(p === DATA_PATH) continue;
+    try{
+      const d = await fbGet(p);
+      if(d && Array.isArray(d.dishes) && d.dishes.length){
+        found.push({ path:p, dishes:d.dishes.length, data:d });
+      }
+    }catch(e){}
+  }
+  return found;
+}
+async function offerLegacyImport(){
+  if(!isAdmin) return false;
+  if(localStorage.getItem('mst_import_done')) return false;
+  if(shared.dishes.length) { localStorage.setItem('mst_import_done','1'); return false; }
+  const found = await scanLegacy();
+  if(!found.length){ localStorage.setItem('mst_import_done','1'); return false; }
+  const best = found.sort((a,b)=>b.dishes-a.dishes)[0];
+  const msg = `Es wurden ältere Daten gefunden:\n\n`
+    + found.map(f=>`  ${f.path} — ${f.dishes} Gerichte`).join('\n')
+    + `\n\nSollen die Daten aus "${best.path}" übernommen werden?`;
+  if(!confirm(msg)){ localStorage.setItem('mst_import_done','1'); return false; }
+  normalize(best.data);
+  if(!Array.isArray(shared.events)) shared.events = [];
+  const ok = await saveShared();
+  localStorage.setItem('mst_import_done','1');
+  if(ok) toast(`${shared.dishes.length} Gerichte übernommen`);
+  return ok;
+}
+// Manuell aus der Admin-Leiste auslösbar
+async function manualImport(){
+  if(!isAdmin) return;
+  closeTools();
+  toast('Suche ältere Daten…');
+  const found = await scanLegacy();
+  if(!found.length){ alert('In den bekannten Alt-Pfaden wurden keine Gerichte gefunden.'); return; }
+  const best = found.sort((a,b)=>b.dishes-a.dishes)[0];
+  const msg = `Gefunden:\n\n` + found.map(f=>`  ${f.path} — ${f.dishes} Gerichte`).join('\n')
+    + `\n\nDaten aus "${best.path}" übernehmen?\n\nACHTUNG: Der aktuelle Stand (${shared.dishes.length} Gerichte, ${(shared.events||[]).length} Termine) wird dabei ersetzt.`;
+  if(!confirm(msg)) return;
+  const keepEvents = shared.events || [];
+  normalize(best.data);
+  // Termine der neuen Version nicht verlieren
+  const ids = new Set((shared.events||[]).map(e=>e.id));
+  shared.events = (shared.events||[]).concat(keepEvents.filter(e=>!ids.has(e.id)));
+  if(await saveShared()){ renderAll(); toast(`${shared.dishes.length} Gerichte übernommen`); }
+}
+
+async function startApp(){
+  document.getElementById('splash').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-avatar').textContent = (userName.charAt(0)||'?').toUpperCase();
+  document.getElementById('user-name-display').childNodes[0].textContent = userName + ' ';
+  applyAdminUI();
+  selectedDate = todayKey();
+  calCursor = new Date();
+  await loadShared();
+  if(await offerLegacyImport()){ /* Daten wurden übernommen */ }
+  await migrateImages();
+  renderAll();
+  startPolling();
+}
+async function refresh(){ await loadShared(); renderAll(); toast('Aktualisiert'); }
+
+let pollTimer=null;
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async ()=>{
+    if(document.hidden) return;
+    if(document.querySelector('.overlay.open')) return;   // nicht stören während Eingabe
+    if(await loadShared()) renderAll();
+  }, POLL_MS);
+}
+document.addEventListener('visibilitychange', async ()=>{
+  if(document.hidden || !userName) return;
+  if(await loadShared()) renderAll(); else updateHeaderSub();
+});
+
+// ==================================================
+//  RENDER-DISPATCH
+// ==================================================
+function renderAll(){
+  updateHeaderSub();
+  renderCalendar();
+  if(eatView==='shop') renderShop();
+  else if(eatView==='hist') renderHistory();
+  else renderWeek();
+  renderTasks();
+  renderWishes();
+  renderDishes();
+  updateDots();
+  updateBell();
+}
+function switchTab(t){
+  currentTab = t;
+  ['cal','week','tasks','wishes','dishes'].forEach(x=>{
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+    document.getElementById('tb-'+x).classList.toggle('active', x===t);
+  });
+  window.scrollTo(0,0);
+}
+function updateDots(){
+  const wishes = shared.wishes||[];
+  document.getElementById('wish-dot').classList.toggle('show', isAdmin && wishes.length>0);
+  const today = todayKey();
+  const hasToday = eventsOn(today).length > 0;
+  document.getElementById('cal-dot').classList.toggle('show', hasToday && currentTab!=='cal');
+  const openMine = tasksForWeek().filter(t=>!t.doneBy && (!t.assignee || t.assignee===userName)).length;
+  document.getElementById('task-dot').classList.toggle('show', openMine>0 && currentTab!=='tasks');
+  const openShop = (shared.shop||[]).filter(i=>!i.done).length;
+  document.getElementById('week-dot').classList.toggle('show', openShop>0 && currentTab!=='week');
+}
+function updateHeaderSub(){
+  const d = new Date();
+  const nice = `${DAYS_S[(d.getDay()+6)%7]}, ${d.getDate()}. ${MONTHS_S[d.getMonth()]}`;
+  const meal = mealForDate(todayKey());
+  document.getElementById('header-sub').textContent = meal ? `${nice} · ${meal.name}` : nice;
+}
+
+// ==================================================
+//  KALENDER
+// ==================================================
+function switchCalView(v){
+  calView = v;
+  document.getElementById('cs-month').classList.toggle('active', v==='month');
+  document.getElementById('cs-list').classList.toggle('active', v==='list');
+  document.getElementById('cal-month-view').style.display = v==='month'?'block':'none';
+  document.getElementById('cal-list-view').style.display  = v==='list'?'block':'none';
+  renderCalendar();
+}
+function calShift(n){
+  calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth()+n, 1, 12);
+  renderCalendar();
+}
+function selectDay(k){ selectedDate = k; renderCalendar(); }
+function goToday(){
+  selectedDate = todayKey();
+  calCursor = new Date();
+  if(calView!=='month') switchCalView('month'); else renderCalendar();
+  toast('Heute');
+}
+
+// Alle Events an einem Tag (inkl. jährlicher Wiederholungen)
+function eventsOn(key){
+  const [ , m, d] = key.split('-');
+  return (shared.events||[]).filter(e=>{
+    if(e.date === key) return true;
+    if(e.yearly){
+      const p = e.date.split('-');
+      return p[1]===m && p[2]===d && e.date <= key;
+    }
+    return false;
+  }).sort((a,b)=>{
+    if(a.allDay && !b.allDay) return -1;
+    if(!a.allDay && b.allDay) return 1;
+    return (a.start||'').localeCompare(b.start||'');
+  });
+}
+// Aufgaben, die an diesem Datum anstehen
+function tasksOn(key){
+  const d = parseKey(key);
+  const idx = (d.getDay()+6)%7;
+  const wk = getWeekKey(0, d);
+  return (shared.tasks||[]).filter(t=>{
+    if(t.recur==='weekly') return t.weekday===idx;
+    return t.dueDate === key;
+  }).map(t=>{
+    const k = doneKey(t, wk);
+    const dn = (shared.done||{})[k];
+    return { ...t, weekKey:wk, doneBy: dn?dn.by:null };
+  });
+}
+
+// Festgelegtes Gericht für ein Datum
+function mealForDate(key){
+  const d = parseKey(key);
+  const wk = getWeekKey(0, d);
+  const idx = (d.getDay()+6)%7;
+  const day = shared.weeks[wk] && shared.weeks[wk].days[idx];
+  if(!day || day.final==null) return null;
+  return shared.dishes.find(x=>x.id===day.final) || null;
+}
+function catStyle(cat){
+  const c = CATS[cat] || CATS.sonstiges;
+  return { color:`var(${c.c})`, bg:`var(${c.b})`, label:c.label };
+}
+
+function renderCalendar(){
+  if(calView==='list'){ renderUpcoming(); return; }
+  const y = calCursor.getFullYear(), m = calCursor.getMonth();
+  document.getElementById('cal-month-label').textContent = `${MONTHS[m]} ${y}`;
+
+  const first = new Date(y,m,1,12);
+  const startOffset = (first.getDay()+6)%7;             // Mo=0
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const cellCount = Math.ceil((startOffset+daysInMonth)/7)*7;  // immer volle Zeilen
+  const gridStart = new Date(y,m,1-startOffset,12);
+  const tKey = todayKey();
+  let html='';
+  for(let i=0;i<cellCount;i++){
+    const d = new Date(gridStart); d.setDate(gridStart.getDate()+i);
+    const k = dateKey(d);
+    const other = d.getMonth()!==m;
+    const evs = eventsOn(k);
+    const dots = evs.slice(0,4).map(e=>`<span class="cal-dot" style="background:${catStyle(e.cat).color}"></span>`).join('');
+    const meal = mealForDate(k);
+    const openTasks = tasksOn(k).filter(t=>!t.doneBy).length;
+    const allDots = dots + (openTasks?`<span class="cal-dot" style="background:var(--text-muted)"></span>`:'');
+    html += `<div class="cal-day ${other?'other':''} ${k===tKey?'today':''} ${k===selectedDate?'sel':''}" onclick="selectDay('${k}')">
+      <span class="cal-num">${d.getDate()}</span>
+      ${allDots?`<span class="cal-dots">${allDots}</span>`:''}
+      ${meal?`<span class="cal-meal"></span>`:''}
+    </div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+  renderDayPanel();
+}
+
+function renderDayPanel(){
+  const el = document.getElementById('day-panel');
+  if(!selectedDate){ el.innerHTML=''; return; }
+  const evs = eventsOn(selectedDate);
+  const meal = mealForDate(selectedDate);
+
+  const evHtml = evs.map(e=>{
+    const cs = catStyle(e.cat);
+    const canEdit = isAdmin || e.by === userName;
+    const time = e.allDay ? 'Ganztägig'
+      : (e.start ? (e.end ? `${e.start} – ${e.end}` : e.start) : '');
+    return `<div class="ev-row">
+      <div class="ev-stripe" style="background:${cs.color}"></div>
+      <div class="ev-main">
+        <div class="ev-title">${esc(e.title)}</div>
+        <div class="ev-meta">
+          <span class="ev-cat" style="background:${cs.bg};color:${cs.color}">${cs.label}</span>
+          ${time?`<span>${esc(time)}</span>`:''}
+          ${e.person?`<span>· ${esc(e.person)}</span>`:''}
+          ${e.yearly?`<span>· jährlich</span>`:''}
+        </div>
+        ${e.notes?`<div class="ev-notes">${esc(e.notes)}</div>`:''}
+      </div>
+      ${canEdit?`<div class="ev-actions">
+        <button class="ev-btn" onclick="openEventSheet('${e.id}')" title="Bearbeiten"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z" stroke-linecap="round"/></svg></button>
+        <button class="ev-btn" onclick="deleteEvent('${e.id}')" title="Löschen"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round"/></svg></button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  const tks = tasksOn(selectedDate);
+  const isCurrentWeek = getWeekKey(0, parseKey(selectedDate)) === getWeekKey(0);
+  const tkHtml = tks.map(t=>{
+    const canToggle = isCurrentWeek && (!t.doneBy || t.doneBy===userName || isAdmin);
+    return `<div class="task-cal-line">
+      <button class="task-check ${t.doneBy?'on':''}" style="width:22px;height:22px"
+        ${canToggle?`onclick="toggleTask('${t.id}')"`:'disabled style="width:22px;height:22px;opacity:.5"'}
+        title="${isCurrentWeek?(t.doneBy?'Rückgängig':'Erledigt'):'Nur in der laufenden Woche änderbar'}">
+        <svg viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span style="flex:1;${t.doneBy?'text-decoration:line-through;color:var(--text-muted)':''}">${esc(t.title)}</span>
+      ${t.doneBy?`<span class="task-by">✓ ${esc(t.doneBy)}</span>`:`<span class="task-pts">${t.points}P</span>`}
+    </div>`;
+  }).join('');
+
+  const hasAny = meal || evHtml || tkHtml;
+  el.innerHTML = `<div class="day-panel">
+    <div class="day-panel-head">
+      <span class="day-panel-date">${fmtDateLong(selectedDate)}</span>
+      <button class="btn-mini" onclick="openEventSheet(null,'${selectedDate}')">+ Termin</button>
+    </div>
+    <div class="day-panel-body">
+      ${meal?`<div class="day-meal-line"><span class="meal-badge">Essen</span><span>${esc(meal.name)}</span></div>`:''}
+      ${evHtml}
+      ${tkHtml}
+      ${hasAny?'':`<div class="no-ev">Nichts geplant.</div>`}
+    </div>
+  </div>`;
+}
+
+function renderUpcoming(){
+  const el = document.getElementById('upcoming-list');
+  const start = new Date(); start.setHours(12,0,0,0);
+  const items = [];
+  for(let i=0;i<60;i++){
+    const d = new Date(start); d.setDate(start.getDate()+i);
+    const k = dateKey(d);
+    eventsOn(k).forEach(e=>items.push({e,k,d}));
+  }
+  if(!items.length){
+    el.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18" stroke-linecap="round"/></svg>Keine Termine in den nächsten 60 Tagen</div>`;
+    return;
+  }
+  el.innerHTML = items.map(({e,k,d})=>{
+    const cs = catStyle(e.cat);
+    const time = e.allDay ? 'Ganztägig' : (e.start||'');
+    return `<div class="up-card" onclick="jumpToDate('${k}')">
+      <div class="up-stripe" style="background:${cs.color}"></div>
+      <div class="up-date">
+        <div class="up-date-d">${d.getDate()}</div>
+        <div class="up-date-m">${MONTHS_S[d.getMonth()]}</div>
+      </div>
+      <div class="up-main">
+        <div class="up-title">${esc(e.title)}</div>
+        <div class="up-sub">${DAYS_S[(d.getDay()+6)%7]}${time?' · '+esc(time):''}${e.person?' · '+esc(e.person):''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function jumpToDate(k){
+  selectedDate = k;
+  calCursor = parseKey(k);
+  switchCalView('month');
+}
+
+// ---- Termin-Sheet ----
+function renderCatPicker(){
+  document.getElementById('ev-cat-pick').innerHTML = CAT_KEYS.map(key=>{
+    const c = CATS[key];
+    const sel = key===evCat;
+    return `<button type="button" class="cat-opt ${sel?'sel':''}"
+      style="${sel?`border-color:var(${c.c});background:var(${c.b});color:var(${c.c})`:''}"
+      onclick="pickCat('${key}')">${c.label}</button>`;
+  }).join('');
+}
+function pickCat(k){ evCat=k; renderCatPicker(); }
+function toggleAllDay(){
+  document.getElementById('ev-time-block').style.display =
+    document.getElementById('ev-allday').checked ? 'none' : 'block';
+}
+
+function openEventSheet(id, presetDate){
+  editingEventId = id;
+  const e = id ? (shared.events||[]).find(x=>x.id===id) : null;
+  if(id && !e){ toast('Termin existiert nicht mehr'); renderCalendar(); return; }
+
+  document.getElementById('event-sheet-title').textContent = e ? 'Termin bearbeiten' : 'Neuer Termin';
+  document.getElementById('ev-title').value  = e ? e.title : '';
+  document.getElementById('ev-date').value   = e ? e.date : (presetDate || selectedDate || todayKey());
+  document.getElementById('ev-allday').checked = e ? !!e.allDay : false;
+  document.getElementById('ev-start').value  = e && e.start ? e.start : '';
+  document.getElementById('ev-end').value    = e && e.end ? e.end : '';
+  document.getElementById('ev-yearly').checked = e ? !!e.yearly : false;
+  document.getElementById('ev-person').value = e && e.person ? e.person : '';
+  document.getElementById('ev-notes').value  = e && e.notes ? e.notes : '';
+  document.getElementById('ev-error').style.display='none';
+  evCat = e ? (CATS[e.cat] ? e.cat : 'sonstiges') : 'termin';
+  renderCatPicker();
+  toggleAllDay();
+  resetSheet('event-overlay'); document.getElementById('event-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeEventSheet(){
+  document.getElementById('event-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  editingEventId = null;
+}
+function evError(msg){
+  const el = document.getElementById('ev-error');
+  el.textContent = msg; el.style.display='block';
+}
+async function saveEvent(){
+  const title = document.getElementById('ev-title').value.trim();
+  const date  = document.getElementById('ev-date').value;
+  const allDay= document.getElementById('ev-allday').checked;
+  let start = document.getElementById('ev-start').value;
+  let end   = document.getElementById('ev-end').value;
+  const yearly = document.getElementById('ev-yearly').checked;
+  const person = document.getElementById('ev-person').value.trim();
+  const notes  = document.getElementById('ev-notes').value.trim();
+
+  if(!title){ evError('Bitte einen Titel eingeben.'); return; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ evError('Bitte ein gültiges Datum wählen.'); return; }
+  if(allDay){ start=''; end=''; }
+  if(!allDay && end && start && end < start){ evError('Ende liegt vor dem Start.'); return; }
+  if(!allDay && !start && end){ evError('Bitte auch eine Startzeit angeben.'); return; }
+
+  const id = editingEventId;
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.events)) shared.events=[];
+    if(id){
+      const ex = shared.events.find(x=>x.id===id);
+      if(!ex) return;
+      Object.assign(ex,{title,date,allDay,start,end,cat:evCat,person,notes,yearly});
+      logAdd('termin', `Termin geändert: ${title}`);
+    } else {
+      shared.events.push({
+        id:'e'+Date.now()+Math.random().toString(36).slice(2,6),
+        title,date,allDay,start,end,cat:evCat,person,notes,yearly,by:userName,ts:Date.now()
+      });
+      logAdd('termin', `Neuer Termin: ${title} am ${parseKey(date).getDate()}.${parseKey(date).getMonth()+1}.`);
+    }
+  });
+  if(ok){
+    selectedDate = date;
+    calCursor = parseKey(date);
+    closeEventSheet();
+    renderAll();
+    toast(id?'Termin gespeichert':'Termin angelegt');
+  }
+}
+async function deleteEvent(id){
+  const e = (shared.events||[]).find(x=>x.id===id);
+  if(!e) return;
+  if(!confirm(`„${e.title}" löschen?`)) return;
+  const ok = await mutate(()=>{
+    shared.events = (shared.events||[]).filter(x=>x.id!==id);
+    logAdd('termin', `Termin gelöscht: ${e.title}`);
+  });
+  if(ok){ renderAll(); toast('Termin gelöscht'); }
+}
+
+// ---- ICS Export (Stufe A) ----
+function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
+function icsFold(line){
+  if(line.length<=73) return line;
+  let out='', rest=line;
+  out = rest.slice(0,73); rest = rest.slice(73);
+  while(rest.length){ out += '\r\n ' + rest.slice(0,72); rest = rest.slice(72); }
+  return out;
+}
+function exportICS(){
+  const stamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mastaler App//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Mastaler'];
+
+  (shared.events||[]).forEach(e=>{
+    const dt = e.date.replace(/-/g,'');
+    L.push('BEGIN:VEVENT');
+    L.push('UID:'+e.id+'@mastaler');
+    L.push('DTSTAMP:'+stamp);
+    if(e.allDay || !e.start){
+      const next = parseKey(e.date); next.setDate(next.getDate()+1);
+      L.push('DTSTART;VALUE=DATE:'+dt);
+      L.push('DTEND;VALUE=DATE:'+dateKey(next).replace(/-/g,''));
+    } else {
+      L.push('DTSTART:'+dt+'T'+e.start.replace(':','')+'00');
+      const endT = e.end || e.start;
+      L.push('DTEND:'+dt+'T'+endT.replace(':','')+'00');
+    }
+    if(e.yearly) L.push('RRULE:FREQ=YEARLY');
+    L.push(icsFold('SUMMARY:'+icsEsc(e.title)));
+    const desc = [e.person?('Für: '+e.person):'', e.notes||''].filter(Boolean).join('\n');
+    if(desc) L.push(icsFold('DESCRIPTION:'+icsEsc(desc)));
+    L.push(icsFold('CATEGORIES:'+icsEsc((CATS[e.cat]||CATS.sonstiges).label)));
+    L.push('END:VEVENT');
+  });
+
+  // Festgelegte Gerichte als ganztägige Einträge
+  Object.keys(shared.weeks||{}).forEach(wk=>{
+    shared.weeks[wk].days.forEach((day,i)=>{
+      if(day.final==null) return;
+      const dish = shared.dishes.find(x=>x.id===day.final);
+      if(!dish) return;
+      const k = dateKeyForWeekDay(wk,i);
+      const next = parseKey(k); next.setDate(next.getDate()+1);
+      L.push('BEGIN:VEVENT');
+      L.push(`UID:meal-${wk}-${i}@mastaler`);
+      L.push('DTSTAMP:'+stamp);
+      L.push('DTSTART;VALUE=DATE:'+k.replace(/-/g,''));
+      L.push('DTEND;VALUE=DATE:'+dateKey(next).replace(/-/g,''));
+      L.push(icsFold('SUMMARY:Essen: '+icsEsc(dish.name)));
+      L.push('CATEGORIES:Essen');
+      L.push('END:VEVENT');
+    });
+  });
+
+  L.push('END:VCALENDAR');
+  const blob = new Blob([L.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mastaler.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  toast('mastaler.ics heruntergeladen');
+}
+
+// ==================================================
+//  WOCHENPLAN (ESSEN)
+// ==================================================
+function switchEatView(v){
+  eatView = v;
+  ['plan','shop','hist'].forEach(x=>{
+    document.getElementById('es-'+x).classList.toggle('active', x===v);
+    document.getElementById('eat-'+x+'-view').style.display = x===v?'block':'none';
+  });
+  if(v==='shop') renderShop();
+  else if(v==='hist') renderHistory();
+  else renderWeek();
+}
+function shiftWeek(n){
+  weekOffset = Math.min(4, Math.max(-26, weekOffset + n));
+  renderWeek();
+}
+function goCurrentWeek(){ weekOffset = 0; renderWeek(); toast('Aktuelle Woche'); }
+function votesFor(wk, i, ids){
+  return ids.map(id=>({
+    dishId:id,
+    dish: shared.dishes.find(d=>d.id===id),
+    voters: shared.votes[`${wk}_${i}_${id}`] || []
+  })).filter(v=>v.dish).sort((a,b)=>b.voters.length-a.voters.length);
+}
+
+function renderWeek(){
+  const el = document.getElementById('week-content');
+  const wk = activeWeekKey();
+  const wd = ensureWeek(wk);
+  const tKey = todayKey();
+  const past = isPastWeek();
+
+  // Navigator beschriften
+  const names = { '-1':'Letzte Woche', '0':'Diese Woche', '1':'Nächste Woche' };
+  document.getElementById('wk-main').textContent = names[String(weekOffset)] || weekLabel(wk);
+  document.getElementById('wk-sub').textContent  = `${weekLabel(wk)} · ${weekRangeLabel(wk)}`;
+
+  let html = '';
+  if(past) html += `<div class="wk-past-note">Vergangene Woche – nur zum Nachschauen.</div>`;
+
+  if(isAdmin && !past){
+    html += `<div class="week-actions">
+      <button class="btn-wk green" onclick="randomFill()"><svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" stroke-linecap="round"/></svg>Zufällig</button>
+      <button class="btn-wk" onclick="clearWeek()"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round"/></svg>Leeren</button>
+    </div>`;
+  }
+
+  const totalOpts = wd.days.reduce((s,d)=>s+(d.options||[]).length,0);
+  if(!isAdmin && totalOpts===0 && !past){
+    html += `<div class="card" style="text-align:center">
+      <p style="font-size:15px;font-weight:600;margin-bottom:6px">Der Admin plant noch die Woche</p>
+      <p style="font-size:13px;color:var(--text-muted)">Sobald Gerichte zur Auswahl stehen, kannst du hier abstimmen. Wünsche kannst du jederzeit senden.</p>
+    </div>`;
+  }
+
+  wd.days.forEach((day,i)=>{
+    const dKey = dateKeyForWeekDay(wk,i);
+    const isToday = dKey === tKey;
+    const options = (day.options||[]).map(id=>shared.dishes.find(d=>d.id===id)).filter(Boolean);
+    const final = day.final!=null ? shared.dishes.find(d=>d.id===day.final) : null;
+    const vd = votesFor(wk,i,options.map(o=>o.id));
+    if(!isAdmin && totalOpts===0 && !final) return;
+
+    let body = '';
+    if(past){
+      body = final
+        ? `<div class="final-set-banner">${esc(final.name)}</div>`
+        : (vd.some(v=>v.voters.length) ? votesDisplay(vd) : '');
+    } else if(isAdmin){
+      const chips = options.map(d=>{
+        const vc = (vd.find(v=>v.dishId===d.id)||{voters:[]}).voters.length;
+        const isF = day.final===d.id;
+        return `<div class="option-chip ${isF?'final':''}">
+          <div class="option-chip-thumb">${d.img?`<img src="${d.img}" alt="">`:pIcon(14)}</div>
+          <span>${esc(d.name)}</span>
+          ${vc?`<span class="option-vote-count">${vc}</span>`:''}
+          ${isF?`<span style="color:var(--green-text);font-size:11px">✓</span>`
+               :`<button class="option-set-final" onclick="setFinal('${wk}',${i},${d.id})" title="Festlegen">✓</button>`}
+          <button class="option-remove" onclick="removeOption('${wk}',${i},${d.id})" title="Entfernen">×</button>
+        </div>`;
+      }).join('');
+      body = (chips?`<div class="options-area">${chips}</div>`:'')
+           + (final?`<div class="final-set-banner">✓ Festgelegt: ${esc(final.name)}</div>`:'')
+           + (vd.some(v=>v.voters.length) && !final ? votesDisplay(vd) : '');
+    } else {
+      if(final) body = `<div class="final-set-banner">✓ Festgelegt: ${esc(final.name)}</div>`;
+      else if(options.length) body = voteButtons(wk,i,options);
+      else if(totalOpts>0) body = `<div class="votes-area"><span class="no-options-hint">Noch keine Optionen für diesen Tag.</span></div>`;
+    }
+
+    const headRight = (isAdmin && !past)
+      ? (options.length>=MAX_OPTIONS
+          ? `<span class="max-hint">voll</span>`
+          : `<button class="btn-edit-day" onclick="openPicker('${wk}',${i})" title="Optionen wählen"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>`)
+      : '';
+
+    const label = (isAdmin && !past)
+      ? `<span class="${options.length?'day-meal-name':'day-meal-none'}" style="font-size:13px">${options.length?`${options.length}/${MAX_OPTIONS} Optionen`:'keine Optionen'}</span>`
+      : `<span class="${(final||options.length)?'day-meal-name':'day-meal-none'}">${final?esc(final.name):(options.length?(past?'nicht festgelegt':'Abstimmung läuft'):(past?'nichts eingetragen':'noch keine Optionen'))}</span>`;
+
+    html += `<div class="day-row">
+      <div class="day-header">
+        <div class="day-chip ${isToday?'is-today':''}">${DAYS_S[i]} ${parseKey(dKey).getDate()}.</div>
+        ${(!isAdmin||past)?`<div class="day-thumb-sm">${final&&final.img?`<img src="${final.img}" alt="">`:pIcon(18)}</div>`:''}
+        ${label}
+        ${headRight}
+      </div>
+      ${body}
+    </div>`;
+  });
+
+  if(past && !wd.days.some(d=>d.final!=null || (d.options||[]).length)){
+    html += `<div class="empty" style="padding:26px">Für diese Woche wurde nichts eingetragen.</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function votesDisplay(vd){
+  const max = Math.max(1,...vd.map(v=>v.voters.length));
+  return `<div class="votes-area"><div class="votes-title">Abstimmung</div>${vd.map(v=>`
+    <div class="vote-option">
+      <div class="vote-thumb">${v.dish.img?`<img src="${v.dish.img}" alt="">`:pIcon(14)}</div>
+      <span class="vote-dish-name">${esc(v.dish.name)}</span>
+      <div class="vote-bar-wrap"><div class="vote-bar" style="width:${Math.round(v.voters.length/max*100)}%"></div></div>
+      <span class="vote-count">${v.voters.length}</span>
+      ${v.voters.length?`<div class="voters-row">${v.voters.map(n=>`<span class="voter-chip">${esc(n)}</span>`).join('')}</div>`:''}
+    </div>`).join('')}</div>`;
+}
+
+function voteButtons(wk,i,options){
+  const counts = options.map(d=>(shared.votes[`${wk}_${i}_${d.id}`]||[]).length);
+  const max = Math.max(1,...counts);
+  return `<div class="votes-area"><div class="votes-title">Wähle dein Gericht</div>${options.map((d,n)=>{
+    const voters = shared.votes[`${wk}_${i}_${d.id}`]||[];
+    const voted = voters.includes(userName);
+    return `<div class="vote-option">
+      <div class="vote-thumb">${d.img?`<img src="${d.img}" alt="">`:pIcon(14)}</div>
+      <span class="vote-dish-name">${esc(d.name)}</span>
+      <div class="vote-bar-wrap"><div class="vote-bar" style="width:${Math.round(counts[n]/max*100)}%"></div></div>
+      <span class="vote-count">${counts[n]}</span>
+      <button class="vote-cast-btn ${voted?'voted':''}" onclick="castVote('${wk}',${i},${d.id},${voted})">${voted?'✓':'Wählen'}</button>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function castVote(wk,i,dishId,already){
+  const ok = await mutate(()=>{
+    const opts = (shared.weeks[wk] && shared.weeks[wk].days[i] && shared.weeks[wk].days[i].options) || [];
+    if(!opts.includes(dishId)) return;
+    opts.forEach(id=>{
+      const k=`${wk}_${i}_${id}`;
+      if(shared.votes[k]) shared.votes[k]=shared.votes[k].filter(n=>n!==userName);
+    });
+    if(!already){
+      const k=`${wk}_${i}_${dishId}`;
+      if(!shared.votes[k]) shared.votes[k]=[];
+      shared.votes[k].push(userName);
+    }
+  });
+  if(ok){ renderWeek(); toast(already?'Stimme zurückgezogen':'Stimme abgegeben'); }
+}
+
+async function randomFill(){
+  if(!shared.dishes.length){ toast('Keine Gerichte vorhanden'); return; }
+  const wk = activeWeekKey();
+  ensureWeek(wk);
+  const hasAny = Object.keys(shared.votes).some(k=>k.startsWith(wk+'_'))
+              || shared.weeks[wk].days.some(d=>(d.options||[]).length>0);
+  if(hasAny && !confirm('Woche ist bereits befüllt. Alles überschreiben inklusive vorhandener Stimmen?')) return;
+  const ok = await mutate(()=>{
+    ensureWeek(wk);
+    shared.weeks[wk].days = shared.weeks[wk].days.map(()=>({
+      options: [...shared.dishes].sort(()=>Math.random()-.5).slice(0,MAX_OPTIONS).map(d=>d.id),
+      final: null
+    }));
+    Object.keys(shared.votes).forEach(k=>{ if(k.startsWith(wk+'_')) delete shared.votes[k]; });
+    logAdd('essen', `Neue Auswahl für ${weekLabel(wk)} – ihr könnt abstimmen`);
+  });
+  if(ok){ renderAll(); toast('Zufällig befüllt'); }
+}
+async function clearWeek(){
+  const wk = activeWeekKey();
+  if(!confirm('Diese Woche komplett leeren?')) return;
+  const ok = await mutate(()=>{
+    shared.weeks[wk] = { days: Array.from({length:7},()=>({options:[],final:null})) };
+    Object.keys(shared.votes).forEach(k=>{ if(k.startsWith(wk+'_')) delete shared.votes[k]; });
+  });
+  if(ok){ renderAll(); toast('Woche geleert'); }
+}
+async function removeOption(wk,i,dishId){
+  const ok = await mutate(()=>{
+    const day = shared.weeks[wk] && shared.weeks[wk].days[i]; if(!day) return;
+    day.options = (day.options||[]).filter(id=>id!==dishId);
+    if(day.final===dishId) day.final=null;
+    delete shared.votes[`${wk}_${i}_${dishId}`];
+  });
+  if(ok) renderAll();
+}
+async function setFinal(wk,i,dishId){
+  const dn = (shared.dishes.find(x=>x.id===dishId)||{}).name || 'Gericht';
+  const ok = await mutate(()=>{
+    ensureWeek(wk); shared.weeks[wk].days[i].final = dishId;
+    logAdd('essen', `${DAYS[i]}: ${dn} steht fest`);
+  });
+  if(ok){ renderAll(); toast('Gericht festgelegt'); }
+}
+
+// ---- Optionen-Picker ----
+function openPicker(wk,i){
+  pickerWeekKey=wk; pickerDay=i;
+  document.getElementById('picker-title').textContent = `${DAYS[i]} – Optionen`;
+  document.getElementById('picker-search').value='';
+  renderPickerList();
+  resetSheet('picker-overlay'); document.getElementById('picker-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function renderPickerList(){
+  const day = ensureWeek(pickerWeekKey).days[pickerDay];
+  const cur = day.options||[];
+  const q = (document.getElementById('picker-search').value||'').toLowerCase().trim();
+  document.getElementById('picker-sub').textContent = `${cur.length}/${MAX_OPTIONS} gewählt`;
+  const list = shared.dishes.filter(d=>!q || d.name.toLowerCase().includes(q));
+  if(!list.length){
+    document.getElementById('picker-list').innerHTML =
+      `<div style="padding:20px;text-align:center;color:var(--text-hint);font-size:14px">Kein Gericht gefunden</div>`;
+    return;
+  }
+  document.getElementById('picker-list').innerHTML = list.map(d=>{
+    const sel = cur.includes(d.id);
+    const dis = !sel && cur.length>=MAX_OPTIONS;
+    return `<div class="pick-item ${sel?'sel':''} ${dis?'disabled':''}" onclick="toggleOption(${d.id})">
+      <div class="pick-thumb">${d.img?`<img src="${d.img}" alt="">`:pIcon(16)}</div>
+      <span class="pick-name">${esc(d.name)}</span>
+      ${sel?`<svg style="flex-shrink:0" width="18" height="18" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="2.5" fill="none"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>`:''}
+    </div>`;
+  }).join('');
+}
+async function toggleOption(dishId){
+  const wk=pickerWeekKey, i=pickerDay;
+  let blocked=false;
+  const ok = await mutate(()=>{
+    const day = ensureWeek(wk).days[i];
+    const opts = day.options||[];
+    const idx = opts.indexOf(dishId);
+    if(idx===-1){
+      if(opts.length>=MAX_OPTIONS){ blocked=true; return; }
+      opts.push(dishId);
+    } else {
+      opts.splice(idx,1);
+      if(day.final===dishId) day.final=null;
+      delete shared.votes[`${wk}_${i}_${dishId}`];
+    }
+    day.options = opts;
+    if(opts.length) logAdd('essen', `Auswahl für ${DAYS[i]} aktualisiert`);
+  });
+  if(blocked){ toast(`Maximal ${MAX_OPTIONS} Optionen pro Tag`); return; }
+  if(ok){ renderPickerList(); renderWeek(); renderCalendar(); }
+}
+function closePicker(){
+  document.getElementById('picker-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ==================================================
+//  EINKAUFSLISTE
+// ==================================================
+function normName(s){ return String(s||'').trim().toLowerCase().replace(/\s+/g,' '); }
+
+function renderShop(){
+  const el = document.getElementById('shop-list');
+  const items = shared.shop || [];
+  if(!items.length){
+    el.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Die Liste ist leer.<br><span style="font-size:13px">„Aus Wochenplan" übernimmt die Zutaten der festgelegten Gerichte.</span>
+    </div>`;
+    return;
+  }
+  const open = items.filter(i=>!i.done);
+  const done = items.filter(i=>i.done);
+  const row = i=>`<div class="shop-row ${i.done?'done':''}">
+      <button class="task-check ${i.done?'on':''}" style="width:24px;height:24px" onclick="toggleShop('${i.id}')" title="${i.done?'Zurück':'Erledigt'}">
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="shop-name">${esc(i.name)}</span>
+      ${i.src?`<span class="shop-src" title="${esc(i.src)}">${esc(i.src)}</span>`:''}
+      <button class="task-del" onclick="removeShop('${i.id}')" title="Entfernen"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg></button>
+    </div>`;
+  el.innerHTML = `<div class="shop-sum">${open.length} offen · ${done.length} erledigt</div>`
+    + open.map(row).join('') + done.map(row).join('');
+}
+
+async function addShopItem(){
+  const inp = document.getElementById('shop-inp');
+  const name = inp.value.trim();
+  if(!name){ inp.focus(); return; }
+  let dupe = false;
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.shop)) shared.shop = [];
+    if(shared.shop.some(i=>normName(i.name)===normName(name) && !i.done)){ dupe = true; return; }
+    shared.shop.push({ id:'s'+Date.now()+Math.random().toString(36).slice(2,5), name, done:false, by:userName, src:'', ts:Date.now() });
+  });
+  if(dupe){ toast('Steht schon auf der Liste'); inp.value=''; return; }
+  if(ok){ inp.value=''; renderShop(); }
+}
+async function toggleShop(id){
+  const ok = await mutate(()=>{
+    const i = (shared.shop||[]).find(x=>x.id===id);
+    if(i){ i.done = !i.done; i.doneBy = i.done ? userName : null; }
+  });
+  if(ok) renderShop();
+}
+async function removeShop(id){
+  const ok = await mutate(()=>{ shared.shop = (shared.shop||[]).filter(x=>x.id!==id); });
+  if(ok) renderShop();
+}
+async function clearDoneShop(){
+  const n = (shared.shop||[]).filter(i=>i.done).length;
+  if(!n){ toast('Nichts abgehakt'); return; }
+  const ok = await mutate(()=>{ shared.shop = (shared.shop||[]).filter(i=>!i.done); });
+  if(ok){ renderShop(); toast(`${n} erledigte entfernt`); }
+}
+async function fillFromWeek(){
+  const wk = activeWeekKey();
+  const wd = shared.weeks[wk];
+  if(!wd){ toast('Für diese Woche ist nichts geplant'); return; }
+  const finals = wd.days.map(d=>d.final).filter(x=>x!=null)
+                   .map(id=>shared.dishes.find(x=>x.id===id)).filter(Boolean);
+  if(!finals.length){ toast('Noch keine Gerichte festgelegt'); return; }
+  const withIng = finals.filter(d=>(d.ing||[]).length);
+  if(!withIng.length){
+    toast('Bei diesen Gerichten sind keine Zutaten hinterlegt');
+    return;
+  }
+  let added = 0, skipped = 0;
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.shop)) shared.shop = [];
+    const have = new Set(shared.shop.filter(i=>!i.done).map(i=>normName(i.name)));
+    withIng.forEach(d=>{
+      (d.ing||[]).forEach(ing=>{
+        const n = String(ing).trim();
+        if(!n) return;
+        if(have.has(normName(n))){ skipped++; return; }
+        have.add(normName(n));
+        shared.shop.push({ id:'s'+Date.now()+Math.random().toString(36).slice(2,6), name:n,
+                           done:false, by:userName, src:d.name, ts:Date.now() });
+        added++;
+      });
+    });
+    if(added) logAdd('einkauf', `${added} Zutaten auf der Einkaufsliste`);
+  });
+  if(ok){
+    renderShop();
+    const miss = finals.length - withIng.length;
+    toast(`${added} übernommen${skipped?`, ${skipped} schon drauf`:''}${miss?`, ${miss} ohne Zutaten`:''}`);
+  }
+}
+
+// ==================================================
+//  VERLAUF
+// ==================================================
+function renderHistory(){
+  const el = document.getElementById('hist-content');
+  const cur = getWeekKey(0);
+
+  // Letzte 8 Wochen inkl. laufender
+  const weeks = [];
+  for(let o=0; o>=-7; o--){
+    const wk = getWeekKey(o);
+    const wd = shared.weeks[wk];
+    if(!wd) continue;
+    const days = wd.days.map((d,i)=>({ i, dish: d.final!=null ? shared.dishes.find(x=>x.id===d.final) : null }));
+    if(!days.some(d=>d.dish)) continue;
+    weeks.push({ wk, o, days });
+  }
+
+  // Wie lange ist jedes Gericht her?
+  const lastSeen = {};
+  Object.keys(shared.weeks||{}).forEach(wk=>{
+    shared.weeks[wk].days.forEach((d,i)=>{
+      if(d.final==null) return;
+      const k = dateKeyForWeekDay(wk,i);
+      if(k > todayKey()) return;                       // Zukunft ignorieren
+      if(!lastSeen[d.final] || k > lastSeen[d.final].date){
+        lastSeen[d.final] = { date:k, count:(lastSeen[d.final]?.count||0)+1 };
+      } else {
+        lastSeen[d.final].count++;
+      }
+    });
+  });
+
+  const today = parseKey(todayKey());
+  const freq = shared.dishes.map(d=>{
+    const ls = lastSeen[d.id];
+    const days = ls ? Math.round((today - parseKey(ls.date))/86400000) : null;
+    return { d, days, count: ls?ls.count:0, date: ls?ls.date:null };
+  }).sort((a,b)=>{
+    if(a.days===null && b.days===null) return a.d.name.localeCompare(b.d.name);
+    if(a.days===null) return -1;                       // nie gegessen zuerst
+    if(b.days===null) return 1;
+    return b.days - a.days;                            // am längsten her zuerst
+  });
+
+  const agoText = f=>{
+    if(f.days===null) return 'noch nie';
+    if(f.days===0) return 'heute';
+    if(f.days===1) return 'gestern';
+    if(f.days<14) return `vor ${f.days} Tagen`;
+    return `vor ${Math.round(f.days/7)} Wochen`;
+  };
+
+  el.innerHTML = `
+    <div class="upcoming-title">Was gab es zuletzt</div>
+    ${weeks.length ? weeks.map(w=>`
+      <div class="hist-week">
+        <div class="hist-head">
+          <span class="hist-kw">${w.o===0?'Diese Woche':(w.o===-1?'Letzte Woche':weekLabel(w.wk))}</span>
+          <span class="hist-range">${weekRangeLabel(w.wk)}</span>
+        </div>
+        <div class="hist-body">
+          ${w.days.filter(d=>d.dish).map(d=>`
+            <div class="hist-line">
+              <span class="hist-day">${DAYS_S[d.i]}</span>
+              <span class="hist-dish">${esc(d.dish.name)}</span>
+            </div>`).join('')}
+        </div>
+      </div>`).join('')
+      : `<div class="empty" style="padding:24px">Noch keine festgelegten Gerichte in den letzten Wochen.</div>`}
+
+    <div class="upcoming-title" style="margin-top:20px">Wann zuletzt gegessen</div>
+    ${shared.dishes.length ? freq.map(f=>`
+      <div class="freq-row">
+        <span class="freq-name">${esc(f.d.name)}</span>
+        <span class="freq-meta">${f.count?`${f.count}×`:''}</span>
+        <span class="freq-badge ${f.days===null?'never':(f.days<14?'recent':'')}"
+          style="${f.days!==null&&f.days>=14?'background:var(--surface2);color:var(--text-muted)':''}">${agoText(f)}</span>
+      </div>`).join('')
+      : `<div class="empty" style="padding:20px">Noch keine Gerichte angelegt.</div>`}
+  `;
+}
+
+// ==================================================
+//  AUFGABEN
+// ==================================================
+function switchTaskView(v){
+  taskView = v;
+  document.getElementById('ts-week').classList.toggle('active', v==='week');
+  document.getElementById('ts-score').classList.toggle('active', v==='score');
+  document.getElementById('task-week-view').style.display  = v==='week'?'block':'none';
+  document.getElementById('task-score-view').style.display = v==='score'?'block':'none';
+  renderTasks();
+}
+// Schlüssel für eine Erledigung: wöchentlich pro Woche, einmalig genau einmal
+function doneKey(t, weekKey){ return t.recur==='weekly' ? `${t.id}:${weekKey}` : `${t.id}:once`; }
+
+// Aufgaben der laufenden Woche inkl. Erledigt-Info
+function tasksForWeek(weekKey){
+  const wk = weekKey || getWeekKey(0);
+  return (shared.tasks||[]).map(t=>{
+    const k = doneKey(t, wk);
+    const d = (shared.done||{})[k];
+    return { ...t, key:k, doneBy: d ? d.by : null, doneTs: d ? d.ts : null };
+  }).filter(t=>{
+    if(t.recur==='weekly') return true;
+    if(!t.dueDate) return !t.doneBy;                    // ohne Datum bis erledigt
+    const mon = dateKeyForWeekDay(wk,0), sun = dateKeyForWeekDay(wk,6);
+    return (t.dueDate <= sun) && (!t.doneBy || t.dueDate >= mon);  // fällig oder diese Woche erledigt
+  }).sort((a,b)=>{
+    if(!!a.doneBy !== !!b.doneBy) return a.doneBy ? 1 : -1;
+    const aw = a.recur==='weekly' ? a.weekday : 9;
+    const bw = b.recur==='weekly' ? b.weekday : 9;
+    if(aw!==bw) return aw-bw;
+    return a.title.localeCompare(b.title);
+  });
+}
+
+function renderTasks(){
+  if(taskView==='score'){ renderScore(); return; }
+  const el = document.getElementById('task-list');
+  const wk = getWeekKey(0);
+  const list = tasksForWeek(wk);
+
+  if(!list.length){
+    el.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-linecap="round"/></svg>
+      ${isAdmin ? 'Noch keine Aufgaben. Lege welche an oder nimm die Vorlagen.' : 'Der Admin hat noch keine Aufgaben angelegt.'}
+    </div>`;
+    return;
+  }
+  const open = list.filter(t=>!t.doneBy);
+  const done = list.filter(t=>t.doneBy);
+  const openPts = open.reduce((s,t)=>s+t.points,0);
+
+  const card = t=>{
+    const mine = !t.assignee || t.assignee===userName;
+    const canUndo = t.doneBy===userName || isAdmin;
+    const when = t.recur==='weekly' ? DAYS_S[t.weekday] : (t.dueDate ? `bis ${parseKey(t.dueDate).getDate()}.${parseKey(t.dueDate).getMonth()+1}.` : 'offen');
+    return `<div class="task-card ${t.doneBy?'done':''}">
+      <button class="task-check ${t.doneBy?'on':''}"
+        onclick="toggleTask('${t.id}')"
+        ${t.doneBy && !canUndo ? 'disabled style="opacity:.5"' : ''}
+        title="${t.doneBy?'Rückgängig':'Als erledigt markieren'}">
+        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="task-main">
+        <div class="task-title">${esc(t.title)}</div>
+        <div class="task-meta">
+          <span>${when}</span>
+          ${t.assignee?`<span>· ${esc(t.assignee)}</span>`:''}
+          ${t.doneBy?`<span class="task-by">✓ ${esc(t.doneBy)}</span>`:''}
+          ${!t.doneBy && !mine?`<span style="color:var(--text-hint)">· zugewiesen</span>`:''}
+        </div>
+      </div>
+      <span class="task-pts">${t.points}P</span>
+      ${isAdmin?`<button class="task-del" onclick="deleteTask('${t.id}')" title="Löschen"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round"/></svg></button>`:''}
+    </div>`;
+  };
+
+  el.innerHTML =
+    (open.length?`<div class="task-group-title">Offen <span>${open.length} · ${openPts}P</span></div>${open.map(card).join('')}`:'')
+  + (done.length?`<div class="task-group-title">Erledigt <span>${done.length}</span></div>${done.map(card).join('')}`:'')
+  + (!open.length?`<div class="card" style="text-align:center;margin-top:12px"><p style="font-size:15px;font-weight:600">Alles erledigt für diese Woche</p><p style="font-size:13px;color:var(--text-muted);margin-top:4px">Gut gemacht.</p></div>`:'');
+}
+
+async function toggleTask(id){
+  const t = (shared.tasks||[]).find(x=>x.id===id);
+  if(!t){ renderTasks(); return; }
+  const wk = getWeekKey(0);
+  const k = doneKey(t, wk);
+  const cur = (shared.done||{})[k];
+  if(cur && cur.by!==userName && !isAdmin){ toast(`Von ${cur.by} erledigt`); return; }
+
+  const ok = await mutate(()=>{
+    if(!shared.done) shared.done = {};
+    const tt = (shared.tasks||[]).find(x=>x.id===id);
+    if(!tt) return;
+    const kk = doneKey(tt, wk);
+    if(shared.done[kk]){ delete shared.done[kk]; }
+    else {
+      shared.done[kk] = { by:userName, ts:Date.now(), points: tt.points };
+      logAdd('aufgabe', `${tt.title} erledigt (+${tt.points} P)`);
+    }
+  });
+  if(ok){
+    const nowDone = !!(shared.done||{})[k];
+    renderTasks(); renderCalendar(); updateDots();
+    toast(nowDone ? `Erledigt · +${t.points} Punkte` : 'Zurückgenommen');
+  }
+}
+
+// ---- Punktestand ----
+function pointsByPerson(sinceTs){
+  const acc = {};
+  Object.values(shared.done||{}).forEach(d=>{
+    if(!d || !d.by) return;
+    if(sinceTs && d.ts < sinceTs) return;
+    acc[d.by] = (acc[d.by]||0) + (Number(d.points)||0);
+  });
+  return acc;
+}
+function balanceOf(name){
+  const earned = Object.values(shared.done||{})
+    .filter(d=>d && d.by===name).reduce((s,d)=>s+(Number(d.points)||0),0);
+  const spent = (shared.redeemed||[])
+    .filter(r=>r && r.by===name).reduce((s,r)=>s+(Number(r.cost)||0),0);
+  return earned - spent;
+}
+function startOfWeekTs(){
+  const m = mondayOfWeekKey(getWeekKey(0));
+  m.setHours(0,0,0,0);
+  return m.getTime();
+}
+
+function renderScore(){
+  const el = document.getElementById('score-content');
+  const weekPts = pointsByPerson(startOfWeekTs());
+  const allPts  = pointsByPerson();
+  const names = [...new Set([...Object.keys(allPts), ...(shared.redeemed||[]).map(r=>r.by), userName])].filter(Boolean);
+  const board = names.map(n=>({ name:n, week:weekPts[n]||0, total:allPts[n]||0, bal:balanceOf(n) }))
+                     .sort((a,b)=>b.week-a.week || b.total-a.total);
+
+  const rewards = (shared.rewards||[]).slice().sort((a,b)=>a.cost-b.cost);
+  const myBal = balanceOf(userName);
+
+  const recent = (shared.redeemed||[]).slice(-5).reverse();
+
+  el.innerHTML = `
+    <div class="score-hero">
+      <div class="score-hero-lbl">Dein Punktestand</div>
+      <div class="score-hero-val">${myBal}</div>
+      <div class="score-hero-sub">${weekPts[userName]||0} Punkte diese Woche gesammelt</div>
+    </div>
+
+    <div class="upcoming-title">Rangliste diese Woche</div>
+    ${board.length ? board.map((p,i)=>`
+      <div class="lb-row">
+        <div class="lb-rank ${i===0&&p.week>0?'top':''}">${i+1}</div>
+        <div class="lb-name ${p.name===userName?'me':''}">${esc(p.name)}</div>
+        <div>
+          <span class="lb-pts">${p.week}</span>
+          <span class="lb-week">von ${p.total} gesamt</span>
+        </div>
+      </div>`).join('')
+      : `<div class="empty" style="padding:20px">Noch keine Punkte gesammelt</div>`}
+
+    <div class="upcoming-title" style="margin-top:18px;display:flex;align-items:center">
+      Belohnungen
+      ${isAdmin?`<button class="btn-mini" style="margin-left:auto;padding:5px 10px;font-size:12px" onclick="openRewardSheet()">+ Neu</button>`:''}
+    </div>
+    ${rewards.length ? rewards.map(r=>{
+      const pct = Math.min(100, Math.round(myBal/r.cost*100));
+      const can = myBal >= r.cost;
+      return `<div class="rw-card">
+        <div class="rw-main">
+          <div class="rw-title">${esc(r.title)}</div>
+          <div class="rw-bar-wrap"><div class="rw-bar" style="width:${pct}%"></div></div>
+          <div class="rw-sub">${myBal} von ${r.cost} Punkten${can?' · verfügbar':''}</div>
+        </div>
+        <button class="btn-redeem" onclick="redeem('${r.id}')" ${can?'':'disabled'}>Einlösen</button>
+        ${isAdmin?`<button class="task-del" onclick="deleteReward('${r.id}')" title="Löschen"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round"/></svg></button>`:''}
+      </div>`;
+    }).join('') : `<div class="empty" style="padding:20px">${isAdmin?'Noch keine Belohnungen angelegt.':'Der Admin hat noch keine Belohnungen angelegt.'}</div>`}
+
+    ${recent.length?`<div class="upcoming-title" style="margin-top:18px">Zuletzt eingelöst</div>
+      ${recent.map(r=>`<div class="lb-row"><div class="lb-name">${esc(r.title)}</div><div class="lb-week">${esc(r.by)} · -${r.cost}P</div></div>`).join('')}`:''}
+  `;
+}
+
+async function redeem(id){
+  const r = (shared.rewards||[]).find(x=>x.id===id);
+  if(!r) return;
+  if(balanceOf(userName) < r.cost){ toast('Nicht genug Punkte'); return; }
+  if(!confirm(`„${r.title}" für ${r.cost} Punkte einlösen?`)) return;
+  const ok = await mutate(()=>{
+    const rr = (shared.rewards||[]).find(x=>x.id===id);
+    if(!rr) return;
+    if(balanceOf(userName) < rr.cost) return;
+    if(!Array.isArray(shared.redeemed)) shared.redeemed = [];
+    shared.redeemed.push({ id:'x'+Date.now(), rewardId:rr.id, title:rr.title, cost:rr.cost, by:userName, ts:Date.now() });
+    logAdd('aufgabe', `Belohnung eingelöst: ${rr.title} (-${rr.cost} P)`);
+  });
+  if(ok){ renderScore(); toast('Eingelöst — sag dem Admin Bescheid'); }
+}
+async function deleteReward(id){
+  const r = (shared.rewards||[]).find(x=>x.id===id);
+  if(r && !confirm(`Belohnung „${r.title}" löschen?`)) return;
+  const ok = await mutate(()=>{ shared.rewards = (shared.rewards||[]).filter(x=>x.id!==id); });
+  if(ok){ renderScore(); }
+}
+
+// ---- Aufgaben-Sheet ----
+function pickRecur(r){
+  tkRecur = r;
+  document.getElementById('tk-r-weekly').classList.toggle('sel', r==='weekly');
+  document.getElementById('tk-r-once').classList.toggle('sel', r==='once');
+  document.getElementById('tk-r-weekly').style.cssText = r==='weekly'?'border-color:var(--green);background:var(--green-light);color:var(--green-text)':'';
+  document.getElementById('tk-r-once').style.cssText   = r==='once'  ?'border-color:var(--green);background:var(--green-light);color:var(--green-text)':'';
+  document.getElementById('tk-weekday-block').style.display = r==='weekly'?'block':'none';
+  document.getElementById('tk-date-block').style.display    = r==='once'?'block':'none';
+}
+function pickWeekday(i){ tkWeekday=i; renderWdPick(); }
+function renderWdPick(){
+  document.getElementById('tk-wd-pick').innerHTML = DAYS_S.map((d,i)=>
+    `<button type="button" class="wd-opt ${i===tkWeekday?'sel':''}" onclick="pickWeekday(${i})">${d}</button>`).join('');
+}
+function pickPoints(p){ tkPoints=p; renderPtsPick(); }
+function renderPtsPick(){
+  document.getElementById('tk-pts-pick').innerHTML = POINT_STEPS.map(p=>
+    `<button type="button" class="cat-opt ${p===tkPoints?'sel':''}"
+      style="${p===tkPoints?'border-color:var(--green);background:var(--green-light);color:var(--green-text)':''}"
+      onclick="pickPoints(${p})">${p} P</button>`).join('');
+}
+function openTaskSheet(id){
+  editingTaskId = id;
+  const t = id ? (shared.tasks||[]).find(x=>x.id===id) : null;
+  document.getElementById('task-sheet-title').textContent = t?'Aufgabe bearbeiten':'Neue Aufgabe';
+  document.getElementById('tk-title').value = t?t.title:'';
+  document.getElementById('tk-assignee').value = t&&t.assignee?t.assignee:'';
+  document.getElementById('tk-date').value = t&&t.dueDate?t.dueDate:todayKey();
+  document.getElementById('tk-error').style.display='none';
+  tkRecur = t?t.recur:'weekly';
+  tkWeekday = t&&t.recur==='weekly'?t.weekday:((new Date().getDay()+6)%7);
+  tkPoints = t?t.points:5;
+  if(!POINT_STEPS.includes(tkPoints)) POINT_STEPS.push(tkPoints);
+  pickRecur(tkRecur); renderWdPick(); renderPtsPick();
+  resetSheet('task-overlay');
+  document.getElementById('task-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeTaskSheet(){
+  document.getElementById('task-overlay').classList.remove('open');
+  document.body.style.overflow=''; editingTaskId=null;
+}
+async function saveTask(){
+  const title = document.getElementById('tk-title').value.trim();
+  const assignee = document.getElementById('tk-assignee').value.trim();
+  const dueDate = document.getElementById('tk-date').value;
+  const err = document.getElementById('tk-error');
+  if(!title){ err.textContent='Bitte einen Titel eingeben.'; err.style.display='block'; return; }
+  if(tkRecur==='once' && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)){ err.textContent='Bitte ein gültiges Datum wählen.'; err.style.display='block'; return; }
+  const id = editingTaskId;
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.tasks)) shared.tasks=[];
+    const base = { title, points:tkPoints, recur:tkRecur, assignee,
+                   weekday: tkRecur==='weekly'?tkWeekday:null,
+                   dueDate: tkRecur==='once'?dueDate:null };
+    if(id){
+      const ex = shared.tasks.find(x=>x.id===id);
+      if(ex) Object.assign(ex, base);
+    } else {
+      shared.tasks.push({ id:'t'+Date.now()+Math.random().toString(36).slice(2,5), ...base, by:userName, ts:Date.now() });
+      logAdd('aufgabe', `Neue Aufgabe: ${title}`);
+    }
+  });
+  if(ok){ closeTaskSheet(); renderAll(); toast(id?'Aufgabe gespeichert':'Aufgabe angelegt'); }
+}
+async function deleteTask(id){
+  const t = (shared.tasks||[]).find(x=>x.id===id);
+  if(t && !confirm(`Aufgabe „${t.title}" löschen?\n\nBereits vergebene Punkte bleiben erhalten.`)) return;
+  const ok = await mutate(()=>{
+    shared.tasks = (shared.tasks||[]).filter(x=>x.id!==id);
+  });
+  if(ok){ renderAll(); toast('Aufgabe gelöscht'); }
+}
+
+// ---- Vorlagen ----
+function openPresets(){
+  presetSel = new Set();
+  renderPresetList();
+  resetSheet('preset-overlay');
+  document.getElementById('preset-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function renderPresetList(){
+  const have = new Set((shared.tasks||[]).map(t=>t.title.toLowerCase()));
+  document.getElementById('preset-list').innerHTML = TASK_PRESETS.map((p,i)=>{
+    const exists = have.has(p.title.toLowerCase());
+    const sel = presetSel.has(i);
+    return `<div class="preset-item ${sel?'sel':''}" ${exists?'style="opacity:.4;pointer-events:none"':''} onclick="togglePreset(${i})">
+      <div style="width:22px;height:22px;border-radius:50%;border:1.8px solid ${sel?'var(--green)':'var(--border-md)'};background:${sel?'var(--green)':'none'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${sel?'<svg width="12" height="12" viewBox="0 0 24 24" stroke="#fff" stroke-width="3" fill="none"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>':''}
+      </div>
+      <span style="flex:1;font-size:14px">${esc(p.title)}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${DAYS_S[p.wd]}</span>
+      <span class="task-pts">${p.pts}P</span>
+      ${exists?'<span style="font-size:11px;color:var(--text-hint)">vorhanden</span>':''}
+    </div>`;
+  }).join('');
+  document.getElementById('preset-btn').textContent = presetSel.size ? `${presetSel.size} übernehmen` : 'Übernehmen';
+}
+function togglePreset(i){
+  if(presetSel.has(i)) presetSel.delete(i); else presetSel.add(i);
+  renderPresetList();
+}
+async function addPresets(){
+  if(!presetSel.size){ toast('Nichts ausgewählt'); return; }
+  const chosen = [...presetSel].map(i=>TASK_PRESETS[i]);
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.tasks)) shared.tasks=[];
+    const have = new Set(shared.tasks.map(t=>t.title.toLowerCase()));
+    chosen.forEach((p,n)=>{
+      if(have.has(p.title.toLowerCase())) return;
+      shared.tasks.push({ id:'t'+Date.now()+n+Math.random().toString(36).slice(2,5),
+        title:p.title, points:p.pts, recur:'weekly', weekday:p.wd, dueDate:null,
+        assignee:'', by:userName, ts:Date.now() });
+    });
+  });
+  if(ok){ closePresets(); renderAll(); toast(`${chosen.length} Aufgaben übernommen`); }
+}
+function closePresets(){
+  document.getElementById('preset-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ---- Belohnungs-Sheet ----
+function openRewardSheet(){
+  document.getElementById('rw-title').value='';
+  document.getElementById('rw-cost').value='50';
+  document.getElementById('rw-error').style.display='none';
+  resetSheet('reward-overlay');
+  document.getElementById('reward-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeRewardSheet(){
+  document.getElementById('reward-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+async function saveReward(){
+  const title = document.getElementById('rw-title').value.trim();
+  const cost = parseInt(document.getElementById('rw-cost').value,10);
+  const err = document.getElementById('rw-error');
+  if(!title){ err.textContent='Bitte einen Namen eingeben.'; err.style.display='block'; return; }
+  if(!(cost>0)){ err.textContent='Kosten müssen größer als 0 sein.'; err.style.display='block'; return; }
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.rewards)) shared.rewards=[];
+    shared.rewards.push({ id:'r'+Date.now(), title, cost, by:userName, ts:Date.now() });
+  });
+  if(ok){ closeRewardSheet(); renderScore(); toast('Belohnung angelegt'); }
+}
+
+// ==================================================
+//  WÜNSCHE
+// ==================================================
+async function addWish(){
+  const inp = document.getElementById('wish-inp');
+  const name = inp.value.trim();
+  if(!name){ inp.focus(); return; }
+  const ok = await mutate(()=>{
+    if(!Array.isArray(shared.wishes)) shared.wishes=[];
+    shared.wishes.push({ id:Date.now(), name, by:userName, ts:Date.now() });
+    logAdd('wunsch', `Wunsch: ${name}`);
+  });
+  if(ok){ inp.value=''; renderWishes(); toast('Wunsch gesendet'); }
+}
+async function deleteWish(id){
+  const ok = await mutate(()=>{ shared.wishes = (shared.wishes||[]).filter(w=>w.id!==id); });
+  if(ok){ renderWishes(); updateDots(); }
+}
+function renderWishes(){
+  const list = document.getElementById('wishes-list');
+  const empty = document.getElementById('wishes-empty');
+  const ws = shared.wishes||[];
+  if(!ws.length){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML = ws.map(w=>`
+    <div class="wish-card">
+      <div>
+        <div class="wish-name">${esc(w.name)}</div>
+        <div class="wish-by">von ${esc(w.by)}</div>
+      </div>
+      <div class="wish-actions">
+        ${isAdmin ? `
+          <button class="btn-wish-add" onclick="openWishDay(${w.id},0)">Diese Wo.</button>
+          <button class="btn-wish-add" onclick="openWishDay(${w.id},1)">Nächste Wo.</button>
+          <button class="btn-wish-del" onclick="deleteWish(${w.id})" title="Ablehnen">✕</button>
+        ` : `
+          <span style="font-size:12px;color:var(--text-muted)">Ausstehend</span>
+          ${w.by===userName?`<button class="btn-wish-del" onclick="deleteWish(${w.id})" title="Zurückziehen">✕</button>`:''}
+        `}
+      </div>
+    </div>`).join('');
+}
+function openWishDay(wishId, offset){
+  const w = (shared.wishes||[]).find(x=>x.id===wishId);
+  if(!w){ renderWishes(); toast('Wunsch existiert nicht mehr'); return; }
+  const wk = getWeekKey(offset);
+  wishForId = wishId; wishForWeekKey = wk;
+  ensureWeek(wk);
+  document.getElementById('wish-day-title').textContent = `„${w.name}" eintragen`;
+  document.getElementById('wish-day-sub').textContent = weekLabel(wk);
+  document.getElementById('wish-day-list').innerHTML = DAYS.map((d,i)=>{
+    const opts = shared.weeks[wk].days[i].options||[];
+    const full = opts.length>=MAX_OPTIONS;
+    return `<div class="day-pick-item ${full?'full':''}" onclick="addWishToDay(${i})">
+      <div class="day-chip">${DAYS_S[i]}</div>
+      <span style="flex:1;font-size:14px">${d}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${opts.length}/${MAX_OPTIONS}${full?' · voll':''}</span>
+    </div>`;
+  }).join('');
+  resetSheet('wish-day-overlay'); document.getElementById('wish-day-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+async function addWishToDay(i){
+  const wk = wishForWeekKey;
+  let full=false, dishName='';
+  const ok = await mutate(()=>{
+    const w = (shared.wishes||[]).find(x=>x.id===wishForId);
+    if(!w) return;
+    dishName = w.name;
+    const day = ensureWeek(wk).days[i];
+    const opts = day.options||[];
+    let dish = shared.dishes.find(d=>d.name.toLowerCase()===w.name.toLowerCase());
+    if(!dish){ dish = { id:Date.now(), name:w.name, img:null, hasImg:false, ing:[] }; shared.dishes.push(dish); }
+    if(!opts.includes(dish.id)){
+      if(opts.length>=MAX_OPTIONS){ full=true; return; }
+      opts.push(dish.id);
+      day.options = opts;
+    }
+    shared.wishes = shared.wishes.filter(x=>x.id!==wishForId);
+    logAdd('wunsch', `${dishName} kommt am ${DAYS[i]} zur Auswahl`);
+  });
+  if(full){ toast('Dieser Tag ist bereits voll'); return; }
+  if(ok){ closeWishDayPicker(); renderAll(); toast(`${dishName} zu ${DAYS_S[i]} hinzugefügt`); }
+}
+function closeWishDayPicker(){
+  document.getElementById('wish-day-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ==================================================
+//  GERICHTE
+// ==================================================
+function compressImage(file, maxSize=400, quality=0.75){
+  return new Promise(resolve=>{
+    const rd = new FileReader();
+    rd.onerror = ()=>resolve(null);
+    rd.onload = ev=>{
+      const img = new Image();
+      img.onerror = ()=>resolve(null);
+      img.onload = ()=>{
+        try{
+          const cv = document.createElement('canvas');
+          let w=img.width, h=img.height;
+          if(w>h && w>maxSize){ h=Math.round(h*maxSize/w); w=maxSize; }
+          else if(h>maxSize){ w=Math.round(w*maxSize/h); h=maxSize; }
+          cv.width=w; cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(cv.toDataURL('image/jpeg',quality));
+        }catch(err){ resolve(null); }
+      };
+      img.src = ev.target.result;
+    };
+    rd.readAsDataURL(file);
+  });
+}
+async function previewImg(inp){
+  const f = inp.files[0]; if(!f) return;
+  document.getElementById('img-btn-lbl').textContent='Wird komprimiert…';
+  const res = await compressImage(f);
+  if(!res){
+    pendingImg=null; inp.value='';
+    document.getElementById('img-preview').style.display='none';
+    document.getElementById('img-btn-lbl').textContent='Foto hinzufügen (optional)';
+    toast('Foto konnte nicht geladen werden'); return;
+  }
+  pendingImg=res;
+  document.getElementById('img-preview').style.display='block';
+  document.getElementById('preview-img').src=res;
+  document.getElementById('img-btn-lbl').textContent='Foto gewählt ✓';
+}
+function parseIng(raw){
+  return String(raw||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,40);
+}
+async function addDish(){
+  const inp = document.getElementById('dish-name-inp');
+  const name = inp.value.trim(); if(!name){ inp.focus(); return; }
+  const img = pendingImg;
+  const ing = parseIng(document.getElementById('dish-ing').value);
+  const newId = Date.now();
+  if(img){
+    const imgOk = await fbSet(`${IMG_PATH}/${newId}`, img);
+    if(!imgOk){ toast('Bild konnte nicht gespeichert werden'); return; }
+    imgToLocal(newId, img);
+  }
+  const ok = await mutate(()=>{
+    shared.dishes.push({ id:newId, name, ing, hasImg: !!img, img: img||null });
+    logAdd('gericht', `${name} angelegt`);
+  });
+  if(ok){
+    inp.value=''; pendingImg=null;
+    document.getElementById('dish-ing').value='';
+    document.getElementById('img-inp').value='';
+    document.getElementById('img-preview').style.display='none';
+    document.getElementById('img-btn-lbl').textContent='Foto hinzufügen (optional)';
+    renderDishes(); toast('Gericht hinzugefügt');
+  }
+}
+async function deleteDish(id){
+  const d = shared.dishes.find(x=>x.id===id);
+  if(d && !confirm(`„${d.name}" löschen?`)) return;
+  if(d && d.hasImg){ await fbSet(`${IMG_PATH}/${id}`, null); imgToLocal(id, null); }
+  const ok = await mutate(()=>{
+    shared.dishes = shared.dishes.filter(x=>x.id!==id);
+    Object.keys(shared.weeks).forEach(wk=>{
+      shared.weeks[wk].days = shared.weeks[wk].days.map(day=>({
+        options:(day.options||[]).filter(o=>o!==id),
+        final: day.final===id ? null : day.final
+      }));
+    });
+    Object.keys(shared.votes).forEach(k=>{ if(k.endsWith('_'+id)) delete shared.votes[k]; });
+  });
+  if(ok) renderAll();
+}
+function renderDishes(){
+  const grid = document.getElementById('dish-grid');
+  const empty = document.getElementById('dishes-empty');
+  const q = (document.getElementById('dish-filter').value||'').toLowerCase().trim();
+  const list = shared.dishes.filter(d=>!q || d.name.toLowerCase().includes(q));
+  if(!shared.dishes.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  if(!list.length){
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:24px;text-align:center;color:var(--text-hint);font-size:14px">Kein Gericht gefunden</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(d=>`
+    <div class="dish-card">
+      <div class="dish-thumb">${d.img?`<img src="${d.img}" alt="${esc(d.name)}">`:pIcon(28)}</div>
+      <div class="dish-name">${esc(d.name)}${(d.ing||[]).length?`<span style="display:block;font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px">${d.ing.length} Zutaten</span>`:''}</div>
+      ${isAdmin?`
+        <button class="del-btn" onclick="deleteDish(${d.id})" title="Löschen"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg></button>
+        <button class="edit-btn-card" onclick="openEdit(${d.id})" title="Bearbeiten"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z" stroke-linecap="round"/></svg></button>
+      `:''}
+    </div>`).join('');
+}
+function openEdit(id){
+  const d = shared.dishes.find(x=>x.id===id); if(!d) return;
+  editingId=id; editPendingImg=undefined;
+  document.getElementById('edit-name-inp').value = d.name;
+  document.getElementById('edit-ing').value = (d.ing||[]).join('\n');
+  document.getElementById('edit-img-preview').innerHTML = d.img
+    ? `<img src="${d.img}" alt="">`
+    : `<svg viewBox="0 0 24 24" width="22" height="22" stroke="var(--text-hint)" stroke-width="1.4" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`;
+  document.getElementById('edit-img-lbl').textContent = d.img?'Foto ändern':'Foto hinzufügen';
+  document.getElementById('edit-remove-img-btn').style.display = d.img?'flex':'none';
+  document.getElementById('edit-img-inp').value='';
+  resetSheet('edit-overlay'); document.getElementById('edit-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('edit-name-inp').focus(),250);
+}
+async function editPreviewImg(inp){
+  const f = inp.files[0]; if(!f) return;
+  document.getElementById('edit-img-lbl').textContent='Wird komprimiert…';
+  const res = await compressImage(f);
+  if(!res){ inp.value=''; document.getElementById('edit-img-lbl').textContent='Foto ändern'; toast('Foto konnte nicht geladen werden'); return; }
+  editPendingImg=res;
+  document.getElementById('edit-img-preview').innerHTML = `<img src="${res}" alt="">`;
+  document.getElementById('edit-img-lbl').textContent='Foto ändern';
+  document.getElementById('edit-remove-img-btn').style.display='flex';
+}
+function removeEditImg(){
+  editPendingImg=null;
+  document.getElementById('edit-img-preview').innerHTML =
+    `<svg viewBox="0 0 24 24" width="22" height="22" stroke="var(--text-hint)" stroke-width="1.4" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`;
+  document.getElementById('edit-img-lbl').textContent='Foto hinzufügen';
+  document.getElementById('edit-remove-img-btn').style.display='none';
+}
+async function saveEdit(){
+  const name = document.getElementById('edit-name-inp').value.trim();
+  if(!name){ toast('Bitte einen Namen eingeben'); return; }
+  const id = editingId, img = editPendingImg;
+  const ing = parseIng(document.getElementById('edit-ing').value);
+  if(img !== undefined){
+    if(img === null){ await fbSet(`${IMG_PATH}/${id}`, null); imgToLocal(id, null); }
+    else {
+      const imgOk = await fbSet(`${IMG_PATH}/${id}`, img);
+      if(!imgOk){ toast('Bild konnte nicht gespeichert werden'); return; }
+      imgToLocal(id, img);
+    }
+  }
+  const ok = await mutate(()=>{
+    const d = shared.dishes.find(x=>x.id===id); if(!d) return;
+    d.name = name;
+    d.ing = ing;
+    if(img !== undefined){ d.img = img; d.hasImg = !!img; }
+    else if(d.hasImg && !d.img){ d.img = imgFromLocal(id); }
+  });
+  if(ok){ renderAll(); closeEdit(); toast('Gericht gespeichert'); }
+}
+function closeEdit(){
+  document.getElementById('edit-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  editingId=null; editPendingImg=undefined;
+}
+
+// ==================================================
+//  HELFER
+// ==================================================
+function pIcon(sz){
+  return `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" stroke="var(--text-hint)" stroke-width="1.5" fill="none"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3" stroke-linecap="round"/></svg>`;
+}
+function esc(s){
+  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2400);
+}
+function overlayBg(e,id){
+  if(e.target===document.getElementById(id)){
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+// Transform-Reste nach Swipe entfernen, bevor ein Sheet neu geöffnet wird
+function resetSheet(overlayId){
+  const ov = document.getElementById(overlayId);
+  if(!ov) return;
+  ov.style.background='';
+  const sh = ov.querySelector('.sheet');
+  if(sh){ sh.style.transform=''; sh.classList.remove('dragging','snapping'); }
+}
+
+// ==================================================
+//  INIT
+// ==================================================
+(async function init(){
+  configReady = loadAdminConfig();
+  await configReady;
+  const saved = localStorage.getItem('mst_user');
+  if(saved) document.getElementById('name-input').value = saved;
+  if(IS_DEV) document.getElementById('dev-banner').style.display='block';
+
+  // Swipe-to-dismiss: nur am Griffbereich, damit Scrollen unberührt bleibt
+  document.querySelectorAll('.sheet-drag').forEach(grip=>{
+    const sheet = grip.closest('.sheet');
+    const overlay = grip.closest('.overlay');
+    if(!sheet || !overlay) return;
+    let y0=0, dy=0, active=false;
+
+    const start = e=>{
+      const p = e.touches ? e.touches[0] : e;
+      y0 = p.clientY; dy = 0; active = true;
+      sheet.classList.add('dragging');
+      sheet.classList.remove('snapping');
+      if(e.cancelable) e.preventDefault();
+    };
+    const move = e=>{
+      if(!active) return;
+      const p = e.touches ? e.touches[0] : e;
+      dy = Math.max(0, p.clientY - y0);            // nur nach unten
+      sheet.style.transform = `translateY(${dy}px)`;
+      overlay.style.background = `rgba(0,0,0,${Math.max(0.15, 0.5 - dy/700)})`;
+      if(e.cancelable) e.preventDefault();
+    };
+    const end = ()=>{
+      if(!active) return;
+      active = false;
+      sheet.classList.remove('dragging');
+      sheet.classList.add('snapping');
+      const close = dy > sheet.offsetHeight * 0.28 || dy > 180;
+      if(close){
+        sheet.style.transform = `translateY(100%)`;
+        setTimeout(()=>{
+          overlay.classList.remove('open');
+          document.body.style.overflow='';
+          sheet.style.transform=''; overlay.style.background='';
+          sheet.classList.remove('snapping');
+        }, 200);
+      } else {
+        sheet.style.transform = '';
+        overlay.style.background = '';
+        setTimeout(()=>sheet.classList.remove('snapping'), 240);
+      }
+    };
+
+    grip.addEventListener('touchstart', start, {passive:false});
+    grip.addEventListener('touchmove',  move,  {passive:false});
+    grip.addEventListener('touchend',   end);
+    grip.addEventListener('touchcancel',end);
+    grip.addEventListener('mousedown', e=>{
+      start(e);
+      const mm = ev=>move(ev), mu = ()=>{ end(); document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+      document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
+    });
+  });
+
+  // ESC schließt offene Sheets
+  document.addEventListener('keydown', e=>{
+    if(e.key!=='Escape') return;
+    const open = document.querySelector('.overlay.open, .pin-overlay.open');
+    if(open){ open.classList.remove('open'); document.body.style.overflow=''; }
+  });
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const sw = reg.installing;
+        sw.addEventListener('statechange',()=>{
+          if(sw.state==='installed' && navigator.serviceWorker.controller){
+            document.getElementById('update-banner').classList.add('show');
+            window._newSW = sw;
+          }
+        });
+      });
+    }).catch(()=>{});
+  }
+})();
+
+function applyUpdate(){
+  if(window._newSW) window._newSW.postMessage('SKIP_WAITING');
+  navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload());
+  document.getElementById('update-banner').classList.remove('show');
+}
+</script>
+</body>
+</html>
