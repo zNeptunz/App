@@ -69,6 +69,25 @@ if errorlevel 1 (
   git push -u origin !BRANCH!
 ) else (
   git push
+  if errorlevel 1 (
+    echo.
+    echo Push abgelehnt. Auf dem Server liegen neuere Commits.
+    echo Das passiert regelmaessig, weil der Kalender-Workflow selbst committet.
+    echo Hole sie und versuche es erneut...
+    echo.
+    git pull --rebase
+    if errorlevel 1 (
+      echo.
+      echo FEHLER beim Zusammenfuehren. Vermutlich ein Konflikt.
+      echo Pruefe mit:  git status
+      echo Danach:      git rebase --continue
+      echo Abbrechen:   git rebase --abort
+      echo.
+      pause
+      exit /b 1
+    )
+    git push
+  )
 )
 
 if errorlevel 1 (
@@ -76,9 +95,7 @@ if errorlevel 1 (
   echo FEHLER beim Push. Haeufige Ursachen:
   echo   - Kein Internet
   echo   - Anmeldedaten abgelaufen
-  echo   - Auf dem Server liegen neuere Commits:
-  echo       git pull --rebase
-  echo     danach deploy.bat erneut ausfuehren
+  echo   - Konflikt beim Zusammenfuehren, siehe oben
   echo   - Branch heisst anders als !BRANCH!:
   echo       git push -u origin HEAD
   echo.
