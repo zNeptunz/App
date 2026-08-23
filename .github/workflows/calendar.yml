@@ -35,7 +35,20 @@ jobs:
             echo "FEHLER: calendar.ics wurde nicht erzeugt."
             exit 1
           fi
-          echo "Größe: $(wc -c < calendar.ics) Bytes, $(grep -c 'BEGIN:VEVENT' calendar.ics || echo 0) Einträge"
+          EVENTS=$(grep -c 'BEGIN:VEVENT' calendar.ics || echo 0)
+          CRLF=$(grep -c $'\r$' calendar.ics || echo 0)
+          echo "Größe:    $(wc -c < calendar.ics) Bytes"
+          echo "Einträge: $EVENTS"
+          echo "CRLF:     $CRLF Zeilen"
+          if [ "$CRLF" -eq 0 ]; then
+            echo "FEHLER: Keine CRLF-Zeilenenden. RFC 5545 verlangt sie,"
+            echo "        sonst lehnen strenge Parser den Feed ab."
+            exit 1
+          fi
+          if [ "$EVENTS" -eq 0 ]; then
+            echo "HINWEIS: Der Feed enthält keinen einzigen Eintrag."
+            echo "         Manche Dienste verweigern leere Kalender."
+          fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add calendar.ics
