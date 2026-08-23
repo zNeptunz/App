@@ -20,23 +20,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: ICS erzeugen
         run: node scripts/build-ics.mjs
 
       - name: Committen wenn geändert
         run: |
-          if git diff --quiet -- calendar.ics; then
-            echo "Keine Änderung."
-            exit 0
+          if [ ! -f calendar.ics ]; then
+            echo "FEHLER: calendar.ics wurde nicht erzeugt."
+            exit 1
           fi
+          echo "Größe: $(wc -c < calendar.ics) Bytes, $(grep -c 'BEGIN:VEVENT' calendar.ics || echo 0) Einträge"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add calendar.ics
+          # --cached erfasst auch neu hinzugefügte Dateien, git diff allein nicht
+          if git diff --cached --quiet; then
+            echo "Keine Änderung gegenüber dem letzten Stand."
+            exit 0
+          fi
           git commit -m "Kalender-Feed aktualisiert"
           git push
