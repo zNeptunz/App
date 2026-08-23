@@ -44,6 +44,13 @@
   --cat-sonstiges:#a89a7d;--cat-sonstiges-bg:#232019;
 }}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+/* Sichtbarer Fokus bei Tastaturbedienung, nicht bei Mausklick */
+:focus-visible{outline:2.5px solid var(--green);outline-offset:2px;border-radius:6px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[onclick]:focus-visible{outline:2.5px solid var(--green);outline-offset:2px}
+/* Bewegungen zurücknehmen, wenn das Betriebssystem es verlangt */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
 html,body{height:100%;overscroll-behavior:none}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);max-width:520px;margin:0 auto;min-height:100vh}
 
@@ -454,18 +461,18 @@ textarea.inp{resize:vertical;min-height:64px;font-size:14px}
 <div id="app" style="display:none">
   <div class="header" id="app-header">
     <div class="header-row">
-      <div class="header-avatar" id="user-avatar" onclick="avatarClick()" title="Admin-Modus">?</div>
+      <div class="header-avatar" id="user-avatar" onclick="avatarClick()" title="Admin-Modus" role="button" tabindex="0" aria-label="Admin-Modus wechseln">?</div>
       <div class="header-text">
         <h1 id="user-name-display">Mastaler <span class="badge-admin" id="admin-badge" style="display:none">Admin</span></h1>
         <p id="header-sub">–</p>
       </div>
       <div class="bell-wrap">
-        <button class="btn-icon" onclick="openActivity()" title="Was ist neu">
+        <button class="btn-icon" onclick="openActivity()" title="Was ist neu" aria-label="Aktivitäten anzeigen">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <span class="bell-dot" id="bell-dot"></span>
       </div>
-      <button class="btn-icon" onclick="refresh()" title="Aktualisieren">
+      <button class="btn-icon" onclick="refresh()" title="Aktualisieren" aria-label="Daten aktualisieren">
         <svg viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -509,11 +516,11 @@ textarea.inp{resize:vertical;min-height:64px;font-size:14px}
 
     <div id="cal-month-view">
       <div class="cal-head">
-        <button class="cal-nav" onclick="calShift(-1)" title="Vorheriger Monat">
+        <button class="cal-nav" onclick="calShift(-1)" title="Vorheriger Monat" aria-label="Vorheriger Monat">
           <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <div class="cal-month" id="cal-month-label" onclick="goToday()" title="Zu heute springen" style="cursor:pointer">–</div>
-        <button class="cal-nav" onclick="calShift(1)" title="Nächster Monat">
+        <div class="cal-month" id="cal-month-label" onclick="goToday()" title="Zu heute springen" role="button" tabindex="0" aria-label="Zu heute springen" style="cursor:pointer">–</div>
+        <button class="cal-nav" onclick="calShift(1)" title="Nächster Monat" aria-label="Nächster Monat">
           <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -549,14 +556,14 @@ textarea.inp{resize:vertical;min-height:64px;font-size:14px}
 
     <div id="eat-plan-view">
       <div class="wk-nav">
-        <button class="wk-nav-btn" onclick="shiftWeek(-1)" title="Woche zurück">
+        <button class="wk-nav-btn" onclick="shiftWeek(-1)" title="Woche zurück" aria-label="Eine Woche zurück">
           <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <div class="wk-nav-label" onclick="goCurrentWeek()" title="Zur aktuellen Woche">
+        <div class="wk-nav-label" onclick="goCurrentWeek()" title="Zur aktuellen Woche" role="button" tabindex="0" aria-label="Zur aktuellen Woche">
           <div class="wk-nav-main" id="wk-main">–</div>
           <div class="wk-nav-sub" id="wk-sub">–</div>
         </div>
-        <button class="wk-nav-btn" onclick="shiftWeek(1)" title="Woche vor">
+        <button class="wk-nav-btn" onclick="shiftWeek(1)" title="Woche vor" aria-label="Eine Woche vor">
           <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -1176,7 +1183,15 @@ async function saveShared(){
 async function mutate(fn){
   await loadShared();
   fn();
-  return saveShared();
+  const ok = await saveShared();
+  if(!ok){
+    // Die Änderung steckt lokal, kam aber nie auf dem Server an.
+    // Ohne Zurücksetzen zeigte die Oberfläche etwas an, das es nicht gibt.
+    await loadShared();
+    renderAll();
+    toast('Nicht gespeichert – Ansicht zurückgesetzt');
+  }
+  return ok;
 }
 
 // ==================================================
@@ -1746,7 +1761,8 @@ function renderCalendar(){
     const meal = mealForDate(k);
     const openTasks = tasksOn(k).filter(t=>!t.doneBy).length;
     const allDots = dots + (openTasks?`<span class="cal-dot" style="background:var(--text-muted)"></span>`:'');
-    html += `<div class="cal-day ${other?'other':''} ${k===tKey?'today':''} ${k===selectedDate?'sel':''}" onclick="selectDay('${k}')">
+    const lbl = `${d.getDate()}. ${MONTHS[d.getMonth()]}` + (evs.length?`, ${evs.length} Termine`:'') + (meal?`, ${meal.name}`:'');
+    html += `<div class="cal-day ${other?'other':''} ${k===tKey?'today':''} ${k===selectedDate?'sel':''}" onclick="selectDay('${k}')" role="button" tabindex="0" aria-label="${esc(lbl)}">
       <span class="cal-num">${d.getDate()}</span>
       ${allDots?`<span class="cal-dots">${allDots}</span>`:''}
       ${meal?`<span class="cal-meal"></span>`:''}
@@ -2056,6 +2072,7 @@ function renderWeek(){
   if(isAdmin && !past){
     html += `<div class="week-actions">
       <button class="btn-wk green" onclick="randomFill()"><svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" stroke-linecap="round"/></svg>Zufällig</button>
+      <button class="btn-wk" onclick="setAllFinal()"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Alle festlegen</button>
       <button class="btn-wk" onclick="clearWeek()"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round"/></svg>Leeren</button>
     </div>`;
   }
@@ -2126,6 +2143,13 @@ function renderWeek(){
 
   if(past && !wd.days.some(d=>d.final!=null || (d.options||[]).length)){
     html += `<div class="empty" style="padding:26px">Für diese Woche wurde nichts eingetragen.</div>`;
+  }
+  // Teilen und Drucken, sobald überhaupt etwas geplant ist
+  if(wd.days.some(d=>d.final!=null || (d.options||[]).length)){
+    html += `<div class="week-actions" style="margin-top:14px;margin-bottom:0">
+      <button class="btn-wk" onclick="shareWeek()"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke-linecap="round" stroke-linejoin="round"/></svg>Teilen</button>
+      <button class="btn-wk" onclick="printWeek()"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" stroke-linecap="round" stroke-linejoin="round"/></svg>Drucken</button>
+    </div>`;
   }
   el.innerHTML = html;
 }
@@ -2211,6 +2235,50 @@ async function removeOption(wk,i,dishId){
   });
   if(ok) renderAll();
 }
+// Legt fuer jeden noch offenen Tag das meistgewaehlte Gericht fest.
+// Bei Gleichstand oder ohne eine einzige Stimme bleibt der Tag offen -
+// da soll der Admin bewusst entscheiden.
+async function setAllFinal(){
+  const wk = activeWeekKey();
+  const wd = ensureWeek(wk);
+  const plan = [];
+  const skipped = [];
+  wd.days.forEach((day,i)=>{
+    if(day.final != null) return;
+    const opts = day.options || [];
+    if(!opts.length) return;
+    const vd = votesFor(wk, i, opts);
+    const top = vd[0];
+    if(!top || !top.voters.length){ skipped.push(`${DAYS_S[i]} (keine Stimme)`); return; }
+    if(vd[1] && vd[1].voters.length === top.voters.length){
+      skipped.push(`${DAYS_S[i]} (Gleichstand)`); return;
+    }
+    plan.push({ i, id: top.dishId, name: top.dish.name, votes: top.voters.length });
+  });
+
+  if(!plan.length){
+    alert(skipped.length
+      ? 'Nichts festzulegen.\n\nOffen geblieben:\n  ' + skipped.join('\n  ')
+      : 'Es gibt nichts festzulegen – alle Tage sind bereits entschieden oder leer.');
+    return;
+  }
+  const msg = 'Folgende Tage werden festgelegt:\n\n'
+    + plan.map(p=>`  ${DAYS_S[p.i]}  ${p.name}  (${p.votes} Stimmen)`).join('\n')
+    + (skipped.length ? '\n\nOffen bleiben:\n  ' + skipped.join('\n  ') : '')
+    + '\n\nFortfahren?';
+  if(!confirm(msg)) return;
+
+  const ok = await mutate(()=>{
+    ensureWeek(wk);
+    plan.forEach(p=>{ shared.weeks[wk].days[p.i].final = p.id; });
+    logAdd('essen', `${plan.length} Tage festgelegt für ${weekLabel(wk)}`);
+  });
+  if(ok){
+    renderAll();
+    toast(skipped.length ? `${plan.length} festgelegt, ${skipped.length} offen` : `${plan.length} Tage festgelegt`);
+  }
+}
+
 async function setFinal(wk,i,dishId){
   const dn = (shared.dishes.find(x=>x.id===dishId)||{}).name || 'Gericht';
   const ok = await mutate(()=>{
@@ -2274,6 +2342,107 @@ async function toggleOption(dishId){
 function closePicker(){
   document.getElementById('picker-overlay').classList.remove('open');
   document.body.style.overflow='';
+}
+
+// ==================================================
+//  WOCHE TEILEN UND DRUCKEN
+// ==================================================
+function weekAsText(wk){
+  const wd = shared.weeks[wk];
+  const lines = [`Essensplan ${weekLabel(wk)} (${weekRangeLabel(wk)})`, ''];
+  let any = false;
+  DAYS_S.forEach((ds,i)=>{
+    const day = wd && wd.days[i];
+    const final = day && day.final!=null ? shared.dishes.find(x=>x.id===day.final) : null;
+    const d = parseKey(dateKeyForWeekDay(wk,i));
+    const datum = `${d.getDate()}.${d.getMonth()+1}.`;
+    if(final){ lines.push(`${ds} ${datum}  ${final.name}`); any = true; }
+    else {
+      const opts = (day && day.options || []).map(id=>shared.dishes.find(x=>x.id===id)).filter(Boolean);
+      lines.push(`${ds} ${datum}  ${opts.length ? 'noch offen (' + opts.map(o=>o.name).join(', ') + ')' : '-'}`);
+    }
+  });
+  const shop = (shared.shop||[]).filter(i=>!i.done);
+  if(shop.length){
+    lines.push('', `Einkaufsliste (${shop.length}):`);
+    shop.forEach(i=>lines.push(`- ${i.name}`));
+  }
+  if(!any) lines.push('', 'Noch nichts festgelegt.');
+  return lines.join('\n');
+}
+
+async function shareWeek(){
+  const wk = activeWeekKey();
+  const text = weekAsText(wk);
+  if(navigator.share){
+    try{ await navigator.share({ title:'Essensplan', text }); return; }
+    catch(e){ if(e && e.name === 'AbortError') return; }
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    toast('In die Zwischenablage kopiert');
+  }catch(e){
+    prompt('Zum Kopieren markieren und Strg+C drücken:', text);
+  }
+}
+
+function printWeek(){
+  const wk = activeWeekKey();
+  const wd = ensureWeek(wk);
+  const rows = DAYS.map((name,i)=>{
+    const day = wd.days[i];
+    const final = day.final!=null ? shared.dishes.find(x=>x.id===day.final) : null;
+    const d = parseKey(dateKeyForWeekDay(wk,i));
+    const tasks = tasksOn(dateKeyForWeekDay(wk,i)).map(t=>t.title);
+    const evs = eventsOn(dateKeyForWeekDay(wk,i)).map(e=>
+      (e.allDay||!e.start ? '' : e.start + ' ') + e.title);
+    const extra = [...evs, ...tasks];
+    return `<tr>
+      <th>${name}<span>${d.getDate()}.${d.getMonth()+1}.</span></th>
+      <td class="meal">${final ? esc(final.name) : '<i>offen</i>'}</td>
+      <td class="side">${extra.length ? extra.map(x=>esc(x)).join('<br>') : ''}</td>
+    </tr>`;
+  }).join('');
+
+  const shop = (shared.shop||[]).filter(i=>!i.done);
+  const shopHtml = shop.length
+    ? `<h2>Einkaufsliste</h2><ul class="shop">${shop.map(i=>`<li>${esc(i.name)}</li>`).join('')}</ul>`
+    : '';
+
+  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<title>Essensplan ${weekLabel(wk)}</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,'Segoe UI',sans-serif;color:#111;margin:0;padding:22mm 18mm}
+  h1{font-size:22pt;margin:0 0 2mm}
+  .sub{font-size:11pt;color:#666;margin-bottom:8mm}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid #ccc;padding:4mm 2mm;text-align:left;vertical-align:top}
+  th{width:26mm;font-size:11pt;font-weight:700}
+  th span{display:block;font-weight:400;color:#777;font-size:9pt}
+  td.meal{font-size:14pt;font-weight:600}
+  td.side{font-size:9.5pt;color:#555;width:55mm}
+  i{color:#aaa;font-weight:400}
+  h2{font-size:13pt;margin:10mm 0 3mm}
+  ul.shop{columns:3;font-size:10.5pt;padding-left:5mm;margin:0}
+  ul.shop li{margin-bottom:1.5mm;break-inside:avoid}
+  footer{margin-top:10mm;font-size:8.5pt;color:#999}
+  @page{size:A4;margin:0}
+  @media print{ body{padding:16mm} }
+</style></head><body>
+<h1>Essensplan</h1>
+<div class="sub">${weekLabel(wk)} · ${weekRangeLabel(wk)}</div>
+<table>${rows}</table>
+${shopHtml}
+<footer>Mastaler App</footer>
+</body></html>`;
+
+  const w = window.open('', '_blank');
+  if(!w){ toast('Der Browser hat das Fenster blockiert'); return; }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(), 400);
 }
 
 // ==================================================
@@ -3160,6 +3329,15 @@ function resetSheet(overlayId){
       const mm = ev=>move(ev), mu = ()=>{ end(); document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
       document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
     });
+  });
+
+  // Enter und Leertaste auf Elementen, die wie Schaltflächen wirken
+  document.addEventListener('keydown', e=>{
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target;
+    if(!el || el.getAttribute('role') !== 'button') return;
+    e.preventDefault();
+    el.click();
   });
 
   // ESC schließt offene Sheets

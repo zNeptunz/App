@@ -1,4 +1,4 @@
-const CACHE = 'mastaler-v5';
+const CACHE = 'mastaler-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png'];
 
 self.addEventListener('install', e => {
