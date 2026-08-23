@@ -1,0 +1,12 @@
+# Zeilenenden vereinheitlichen - unterdrueckt die CRLF-Warnungen beim Commit
+* text=auto eol=lf
+
+# Batch-Dateien brauchen unter Windows CRLF, sonst laufen sie unzuverlaessig
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binaerdateien nicht anfassen
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
